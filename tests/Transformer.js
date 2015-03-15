@@ -1,17 +1,37 @@
-const assert = require('assert'),
-    Transformer = require('../dist/Transformer')
+const {assert} = require('chai'),
+    Transformer = require('../dist/Transformer'),
+    {inspect} = require('util')
 
 
-function Foo() {}
+class Foo {
+    constructor() {}
+    toString() { return '<foo>' }
+}
 function isFoo(x) { return x instanceof Foo }
 function enc(x) { return null }
 function dec() { return new Foo() }
 
+class Tree {
+    constructor(val, children=[]) {
+        this.val = val
+        this.children = children.map((child) =>
+            child instanceof Tree ? child : new Tree(child))
+    }
+    toString() {
+        let val = this.val.toString(),
+            children = this.children.map((c) => c.toString()).join(', ')
+        return `Tree{ ${val}, [ ${children} ] }`
+    }
+}
+
 
 describe('Transformer', () => {
 
-    let spec1 = {token: 'foo', class: Foo, encode: enc, decode: dec},
-        spec2 = {token: 'foo', class: Foo, encode: enc}
+    let spec1 = {token: 'foo', class: Foo,   encode: enc, decode: dec},
+        spec2 = {token: 'foo', class: Foo,   encode: enc},
+        spec3 = {token: 'foo', pred:  isFoo, encode: enc, decode: dec},
+        t     = new Transformer([spec1]),
+        foo   = new Foo
 
 
     describe('#validateSpec()', () => {
@@ -97,6 +117,140 @@ describe('Transformer', () => {
 
         it('passes if there are more than one encoder for some token', () => {
             assert.strictEqual(undefined, val([spec1, spec2]))
+        })
+
+    })
+
+
+    describe('#constructor()', () => {
+
+        it('checks specs with #validateSpecs() throwing it\'s messages as errors', () => {
+            let test = () => new Transformer({})
+            assert.throws(test, 'Failed to create transformer: expected array of specs')
+        })
+
+        it('check specs with #validateConsistency() throwint it\'s messages as errors', () => {
+            let test = () => new Transformer([spec2])
+            assert.throws(test, 'Failed to create transformer: 0 decoders for token foo')
+        })
+
+        it('preserves specs if valid', () => {
+            let specs = [spec1, spec2]
+            assert.strictEqual(specs, (new Transformer(specs)).specs)
+        })
+
+        it('assigns prefix and serializer from params', () => {
+            let t = new Transformer([], {prefix: 'foo', serializer: 'bar'})
+            assert.strictEqual('foo', t.prefix)
+            assert.strictEqual('bar', t.serializer)
+        })
+
+        it('uses default prefix and serializer if not provided', () => {
+            assert.strictEqual('$', t.prefix)
+            assert.strictEqual(JSON, t.serializer)
+        })
+
+    })
+
+
+    let treeSpec = {
+            token: 'tree',
+            class: Tree,
+            encode: (tree) => ({val: tree.val, children: tree.children}),
+            decode: (obj) => new Tree(obj.val, obj.children)
+        },
+        treeT = new Transformer([spec1, treeSpec]),
+        tree = new Tree(foo, [new Tree(foo)]),
+        treeRepr = {$tree: {
+            val: {$foo: null},
+            children: [
+                {$tree: {
+                    val: {$foo: null},
+                    children: []
+                }}
+            ]
+        }}
+
+
+    describe('#encode()', () => {
+
+        it('doesn\'t change scalar values by default', () => {
+            assert.strictEqual(t.encode(3), 3)
+            assert.strictEqual(t.encode('x'), 'x')
+            assert.strictEqual(t.encode(null), null)
+            assert.strictEqual(t.encode(undefined), undefined)
+        })
+
+        it('clones arrays and plain objects by default', () => {
+            let arr = [3],
+                obj = {x: 3}
+            assert.notEqual(t.encode(arr), arr)
+            assert.notEqual(t.encode(obj), obj)
+            assert.deepEqual(t.encode(arr), arr)
+            assert.deepEqual(t.encode(obj), obj)
+        })
+
+        it('converts instance if spec class matches', () => {
+            assert.deepEqual(t.encode(foo), {$foo: null})
+        })
+
+        it('converts value if spec predicate matches', () => {
+            let t = new Transformer([spec3])
+            assert.deepEqual(t.encode(foo), {$foo: null})
+        })
+
+        it('converts values inside nested arrays and plain objects', () => {
+            let arr = [[foo]],
+                obj = {baz: {bar: foo}}
+            assert.deepEqual(t.encode(arr), [[{$foo: null}]])
+            assert.deepEqual(t.encode(obj), {baz: {bar: {$foo: null}}})
+        })
+
+        it('converts values inside encoded objects', () => {
+            assert.deepEqual(treeT.encode(tree), treeRepr)
+        })
+
+    })
+
+
+    describe('#decode()', () => {
+
+        it('doesn\'t change scalar values', () => {
+            assert.strictEqual(t.decode(3), 3)
+            assert.strictEqual(t.decode('x'), 'x')
+            assert.strictEqual(t.decode(null), null)
+            assert.strictEqual(t.decode(undefined), undefined)
+        })
+
+        it('clones arrays and plain objects without tokens', () => {
+            let arr = [3],
+                obj = {x: 3}
+            assert.notEqual(t.decode(arr), arr)
+            assert.notEqual(t.decode(obj), obj)
+            assert.deepEqual(t.decode(arr), arr)
+            assert.deepEqual(t.decode(obj), obj)
+        })
+
+        it('recognizes tokens in object keys and decodes values', () => {
+            assert.instanceOf(t.decode({$foo: null}), Foo)
+        })
+
+        it('recognizes tokens in nested objects and arrays', () => {
+            let encoded1 = [[{$foo: null}]],
+                decoded1 = [[foo]],
+                encoded2 = {baz: {bar: {$foo: null}}},
+                decoded2 = {baz: {bar: foo}}
+            assert.deepEqual(t.decode(encoded1), decoded1)
+            assert.deepEqual(t.decode(encoded2), decoded2)
+            assert.instanceOf(t.decode(encoded1)[0][0], Foo)
+            assert.instanceOf(t.decode(encoded2).baz.bar, Foo)
+        })
+
+        it('recreates encoded objects recursively', () => {
+            let decoded = treeT.decode(treeRepr)
+            assert.instanceOf(decoded.val, Foo)
+            assert.instanceOf(decoded.children[0], Tree)
+            assert.instanceOf(decoded.children[0].val, Foo)
         })
 
     })
