@@ -1,0 +1,36 @@
+{
+  "name": "jx",
+  "version": "0.1.0",
+  "description": "JSON extended",
+  "main": "dist/jx.js",
+  "scripts": {
+    "build": "babel-node `which gulp`",
+    "watch": "babel-node `which gulp` watch",
+    "test": "mocha --compilers js:babel/register --recursive tests/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thaumantg/jx.git"
+  },
+  "keywords": [
+    "json",
+    "extended",
+    "extension",
+    "ejson"
+  ],
+  "author": "Elia Schelokov <thaumant@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/thaumant/jx/issues"
+  },
+  "homepage": "https://github.com/thaumant/jx",
+  "dependencies": {
+    "lodash": "^3.5.0"
+  },
+  "devDependencies": {
+    "gulp": "^3.8.11",
+    "gulp-babel": "^4.0.0",
+    "gulp-mocha": "^2.0.0",
+    "gulp-sourcemaps": "^1.5.0"
+  }
+}
