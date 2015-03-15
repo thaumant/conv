@@ -1,23 +1,25 @@
 const {
-    chain,
-    compact,
-    filter,
-    find,
-    has,
-    isArray,
-    isEmpty,
-    isFunction,
-    isPlainObject,
-    isString,
-    isUndefined,
-    keys,
-    map,
-    mapValues,
-    uniq,
-    pluck
-} = require('lodash')
+        chain,
+        compact,
+        filter,
+        find,
+        has,
+        isArray,
+        isEmpty,
+        isFunction,
+        isPlainObject,
+        isString,
+        isUndefined,
+        keys,
+        map,
+        mapValues,
+        uniq,
+        pluck
+    } = require('lodash'),
+    {inspect} = require('util')
 
 
+const MUTATE = true
 
  
 export default class Transformer {
@@ -26,9 +28,77 @@ export default class Transformer {
         if (err) throw new Error(`Failed to create transformer: ${err}`)
 
         this.prefix = params.prefix || '$'
-        this.parser = params.parser || JSON
-        this.specs  = specs
+        this.serializer = params.serializer || JSON
+        this.specs = specs
         this._hasPredicates = !isEmpty(filter(specs, 'pred'))
+    }
+
+    /*
+        Try to pick encoder:
+            - check if some class matches
+            - check if some predicate matches
+            - convert elements if array or plain object
+            - otherwise leave as is
+    */
+    encode(val) { return this._encode(val) }
+
+    _encode(val, mutate=false) {
+        if (val && typeof val.constructor === 'function') {
+            for (let i in this.specs) {
+                if (val.constructor !== this.specs[i].class) continue
+                let {token, encode} = this.specs[i],
+                    encoded = encode(val)
+                return { [this.prefix + token]: this.encode(encoded, MUTATE) }
+            }
+        }
+        if (this._hasPredicates) {
+            for (let i in this.specs) {
+                let spec = this.specs[i]
+                if (!spec.pred) continue
+                if (spec.pred(val)) {
+                    let {token, encode} = spec,
+                        encoded = encode(val)
+                    return { [this.prefix + token]: this.encode(encoded, MUTATE) }
+                }
+            }
+        }
+        {
+            let mapper
+            if (val instanceof Array) mapper = map
+            else if (isPlainObject(val)) mapper = mapValues
+            if (mapper) {
+                if (mutate) {
+                    for (let i in val) val[i] = this.encode(val[i])
+                    return val
+                } else {
+                    return mapper(val, (child) => this.encode(child))
+                }
+            }
+        }
+        return val
+    }
+
+
+    decode(val) {
+        if (val instanceof Array) {
+            return map(val, (child) => this.decode(child))
+        }
+        if (val instanceof Object) {
+            let _keys = Object.keys(val)
+            if (_keys.length === 1 && _keys[0].startsWith(this.prefix)) {
+                let key = _keys[0],
+                    token = key.slice(this.prefix.length)
+                for (let i in this.specs) {
+                    let spec = this.specs[i]
+                    if (spec.token === token && spec.decode) {
+                        let decodedChildren = this.decode(val[key])
+                        return spec.decode(decodedChildren)
+                    }
+                }
+            }
+            return mapValues(val, (child) => this.decode(child))
+        }
+        return val
     }
 
 
