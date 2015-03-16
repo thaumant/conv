@@ -1,5 +1,6 @@
 const {
         chain,
+        cloneDeep,
         compact,
         filter,
         find,
@@ -19,9 +20,6 @@ const {
     {inspect} = require('util')
 
 
-const MUTATE = true
-
- 
 export default class Transformer {
     constructor(specs, params={}) {
         let err = this.validateSpecs(specs) || this.validateConsistency(specs)
@@ -43,13 +41,17 @@ export default class Transformer {
     */
     encode(val) { return this._encode(val) }
 
+
+    decode(val) { return this._decode(cloneDeep(val)) }
+
+
     _encode(val, mutate=false) {
         if (val && typeof val.constructor === 'function') {
             for (let i in this._classSpecs) {
                 if (val.constructor !== this._classSpecs[i].class) continue
                 let {token, encode} = this._classSpecs[i],
                     encoded = encode(val)
-                return { [this.prefix + token]: this.encode(encoded, MUTATE) }
+                return { [this.prefix + token]: this._encode(encoded, true) }
             }
         }
         for (let i in this._predSpecs) {
@@ -57,7 +59,7 @@ export default class Transformer {
             if (spec.pred(val)) {
                 let {token, encode} = spec,
                     encoded = encode(val)
-                return { [this.prefix + token]: this.encode(encoded, MUTATE) }
+                return { [this.prefix + token]: this._encode(encoded, true) }
             }
         }
         {
@@ -66,10 +68,10 @@ export default class Transformer {
             else if (isPlainObject(val)) mapper = mapValues
             if (mapper) {
                 if (mutate) {
-                    for (let i in val) val[i] = this.encode(val[i])
+                    for (let i in val) val[i] = this._encode(val[i])
                     return val
                 } else {
-                    return mapper(val, (child) => this.encode(child))
+                    return mapper(val, (child) => this._encode(child))
                 }
             }
         }
@@ -77,9 +79,10 @@ export default class Transformer {
     }
 
 
-    decode(val) {
+    _decode(val) {
         if (val instanceof Array) {
-            return map(val, (child) => this.decode(child))
+            for (let i in val) val[i] = this._decode(val[i])
+            return val
         }
         if (val instanceof Object) {
             let _keys = Object.keys(val)
@@ -94,7 +97,8 @@ export default class Transformer {
                     }
                 }
             }
-            return mapValues(val, (child) => this.decode(child))
+            for (let i in val) val[i] = this._decode(val[i])
+            return val
         }
         return val
     }
