@@ -30,36 +30,34 @@ export default class Transformer {
         this.prefix = params.prefix || '$'
         this.serializer = params.serializer || JSON
         this.specs = specs
-        this._hasPredicates = !isEmpty(filter(specs, 'pred'))
+        this._predSpecs = filter(specs, 'pred')
+        this._classSpecs = filter(specs, 'class')
     }
 
     /*
         Try to pick encoder:
             - check if some class matches
             - check if some predicate matches
-            - convert elements if array or plain object
+            - convert children if array or plain object
             - otherwise leave as is
     */
     encode(val) { return this._encode(val) }
 
     _encode(val, mutate=false) {
         if (val && typeof val.constructor === 'function') {
-            for (let i in this.specs) {
-                if (val.constructor !== this.specs[i].class) continue
-                let {token, encode} = this.specs[i],
+            for (let i in this._classSpecs) {
+                if (val.constructor !== this._classSpecs[i].class) continue
+                let {token, encode} = this._classSpecs[i],
                     encoded = encode(val)
                 return { [this.prefix + token]: this.encode(encoded, MUTATE) }
             }
         }
-        if (this._hasPredicates) {
-            for (let i in this.specs) {
-                let spec = this.specs[i]
-                if (!spec.pred) continue
-                if (spec.pred(val)) {
-                    let {token, encode} = spec,
-                        encoded = encode(val)
-                    return { [this.prefix + token]: this.encode(encoded, MUTATE) }
-                }
+        for (let i in this._predSpecs) {
+            let spec = this._predSpecs[i]
+            if (spec.pred(val)) {
+                let {token, encode} = spec,
+                    encoded = encode(val)
+                return { [this.prefix + token]: this.encode(encoded, MUTATE) }
             }
         }
         {
