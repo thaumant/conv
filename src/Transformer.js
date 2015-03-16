@@ -129,11 +129,13 @@ export default class Transformer {
 
     /*
         To exclude ambiguity assert that for each token:
-            - there are one and only one decoder
-            - there are at least one encoder
+            - for each token there are one and only one decoder
+            - for each token there are at least one encoder
+            - any two specs have different classes
     */
     validateConsistency(specs) {
-        let tokens = uniq(pluck(specs, 'token'))
+        let tokens = uniq(pluck(specs, 'token')),
+            classes = filter(pluck(specs, 'class'))
         for (let i in tokens) {
             let token    = tokens[i],
                 relSpecs = filter(specs, (s) => s.token === token),
@@ -142,6 +144,7 @@ export default class Transformer {
             if (decoders.length !== 1) return `${decoders.length} decoders for token ${token}`
             if (encoders.length < 1)   return `no encoders for token ${token}`
         }
+        if (classes.length !== uniq(classes).length) return 'some specs contain the same class'
     }
 
 }
