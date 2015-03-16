@@ -7,6 +7,10 @@ class Foo {
     constructor() {}
     toString() { return '<foo>' }
 }
+class Bar {
+    constructor() {}
+    toString() { return '<bar>' }
+}
 function isFoo(x) { return x instanceof Foo }
 function enc(x) { return null }
 function dec() { return new Foo() }
@@ -30,8 +34,26 @@ describe('Transformer', () => {
     let spec1 = {token: 'foo', class: Foo,   encode: enc, decode: dec},
         spec2 = {token: 'foo', class: Foo,   encode: enc},
         spec3 = {token: 'foo', pred:  isFoo, encode: enc, decode: dec},
+        treeSpec = {
+            token: 'tree',
+            class: Tree,
+            encode: (tree) => ({val: tree.val, children: tree.children}),
+            decode: (obj) => new Tree(obj.val, obj.children)
+        },
         t     = new Transformer([spec1]),
-        foo   = new Foo
+        treeT = new Transformer([spec1, treeSpec]),
+        foo   = new Foo,
+        bar   = new Bar,
+        tree = new Tree(foo, [new Tree(foo)]),
+        treeRepr = {$tree: {
+            val: {$foo: null},
+            children: [
+                {$tree: {
+                    val: {$foo: null},
+                    children: []
+                }}
+            ]
+        }}
 
 
     describe('#validateSpec()', () => {
@@ -99,7 +121,7 @@ describe('Transformer', () => {
         let val = Transformer.prototype.validateConsistency
 
         it('passes if there are only one incoder and decoder for each token', () => {
-            let barSpec = {token: 'bar', class: Foo, encode: enc, decode: dec}
+            let barSpec = {token: 'bar', class: Bar, encode: enc, decode: dec}
             assert.strictEqual(undefined, val([spec1, barSpec]))
         })
 
@@ -115,8 +137,8 @@ describe('Transformer', () => {
             assert.strictEqual('no encoders for token foo', val([{token: 'foo', class: Foo, decode: dec}]))
         })
 
-        it('passes if there are more than one encoder for some token', () => {
-            assert.strictEqual(undefined, val([spec1, spec2]))
+        it('tells if there are more than one spec contain some class', () => {
+            assert.strictEqual('some specs contain the same class', val([spec1, spec2]))
         })
 
     })
@@ -135,7 +157,7 @@ describe('Transformer', () => {
         })
 
         it('preserves specs if valid', () => {
-            let specs = [spec1, spec2]
+            let specs = [spec1, treeSpec]
             assert.strictEqual(specs, (new Transformer(specs)).specs)
         })
 
@@ -151,25 +173,6 @@ describe('Transformer', () => {
         })
 
     })
-
-
-    let treeSpec = {
-            token: 'tree',
-            class: Tree,
-            encode: (tree) => ({val: tree.val, children: tree.children}),
-            decode: (obj) => new Tree(obj.val, obj.children)
-        },
-        treeT = new Transformer([spec1, treeSpec]),
-        tree = new Tree(foo, [new Tree(foo)]),
-        treeRepr = {$tree: {
-            val: {$foo: null},
-            children: [
-                {$tree: {
-                    val: {$foo: null},
-                    children: []
-                }}
-            ]
-        }}
 
 
     describe('#encode()', () => {
