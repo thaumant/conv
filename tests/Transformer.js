@@ -174,7 +174,7 @@ describe('Transformer', () => {
 
     describe('#encode()', () => {
 
-        it('doesn\'t change scalar values by default', () => {
+        it('does not change scalar values by default', () => {
             assert.strictEqual(t.encode(3), 3)
             assert.strictEqual(t.encode('x'), 'x')
             assert.strictEqual(t.encode(null), null)
@@ -208,6 +208,27 @@ describe('Transformer', () => {
 
         it('converts values inside encoded objects', () => {
             assert.deepEqual(treeT.encode(tree), treeRepr)
+        })
+
+    })
+
+
+    describe('#_encode()', () => {
+
+        it('copies object and array by default', () => {
+            let obj = {foo: 3, bar: 14},
+                arr = [3, 14]
+            assert.notEqual(t._encode(obj), obj)
+            assert.notEqual(t._encode(arr), arr)
+            assert.deepEqual(t._encode(obj), obj)
+            assert.deepEqual(t._encode(arr), arr)
+        })
+
+        it('modifies object when `mutate` argument is true', () => {
+            let obj = {foo: 3, bar: 14},
+                arr = [3, 14]
+            assert.strictEqual(t._encode(obj, true), obj)
+            assert.strictEqual(t._encode(arr, true), arr)
         })
 
     })
