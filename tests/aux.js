@@ -6,9 +6,13 @@ export class Foo {
 }
 
 export class Bar {
-    constructor() { }
+    constructor(arg1, arg2) {
+        this.arg1 = arg1
+        this.arg2 = arg2
+    }
     toString() { return '<bar>' }
-    toJSON() { return null }
+    toJSON() { return 42 }
+    bar() { return 24 }
 }
 
 export function isFoo(x) { return x instanceof Foo }

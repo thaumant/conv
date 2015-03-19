@@ -51,4 +51,53 @@ describe('ClassTransformer', () => {
 
     })
 
+    
+    describe('#constructor()', () => {
+
+        it('performs #validateSpec()', () => {
+            let test1 = () => new ClassTransformer({class: Foo, token: 2}),
+                test2 = () => new ClassTransformer({token: 'Foo', class: Foo, decode: fooDec})
+            assert.throw(test1, 'Failed to create class transformer: invalid token for Foo')
+            assert.throw(test2, 'Failed to create class transformer: missing encoder for Foo')
+        })
+
+        it('stores spec.class as spec property', () => {
+            let t = new ClassTransformer({class: Bar})
+            assert.strictEqual(Bar, t.class)
+        })
+
+        it('stores spec.token if given, otherwise make token from class name', () => {
+            let t1 = new ClassTransformer({class: Bar, token: 'Baz'}),
+                t2 = new ClassTransformer({class: Bar})
+            assert.strictEqual('Baz', t1.token)
+            assert.strictEqual('Bar', t2.token)
+        })
+
+        it('stores decoder if given, otherwise make decoder that calls class constructor', () => {
+            let t1 = new ClassTransformer({class: Bar, decode: barDec}),
+                t2 = new ClassTransformer({class: Bar}),
+                decoded = t2.decode(3)
+            assert.strictEqual(barDec, t1.decode)
+            assert.instanceOf(decoded, Bar)
+            assert.strictEqual(3, decoded.arg1)
+            assert.strictEqual(undefined, decoded.arg2)
+        })
+
+        it('stores encoder as is if function given', () => {
+            let t = new ClassTransformer({class: Bar, encode: barEnc})
+            assert.strictEqual(barEnc, t.encode)
+        })
+
+        it('makes encoder that calls specified method if spec.encoder is string', () => {
+            let t = new ClassTransformer({class: Bar, encode: 'bar'})
+            assert.strictEqual(24, t.encode(new Bar))
+        })
+
+        it('uses #toJSON() if exists and no encoder given', () => {
+            let t = new ClassTransformer({class: Bar})
+            assert.strictEqual(42, t.encode(new Bar))
+        })
+
+    })
+
 })
