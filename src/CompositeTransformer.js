@@ -1,3 +1,5 @@
+const {mapValues, map, isPlainObject} = require('lodash')
+
 const UnitTransformer    = require('./UnitTransformer.js'),
     ClassTransformer     = require('./ClassTransformer.js'),
     PredicateTransformer = require('./PredicateTransformer.js')
@@ -15,6 +17,41 @@ module.exports = class CompositeTransformer {
         this.classTransformers = this.transformers.filter((s) => s instanceof ClassTransformer)
         let err = this.validateConsistency(this.transformers)
         if (err) throw new Error(`Inconsistent transformers: ${err}`)
+    }
+
+    encode(val) { return this._encode(val) }
+
+    _encode(val, mutate=false) {
+        if (val && typeof val.constructor === 'function') {
+            for (let i in this.classTransformers) {
+                if (val.constructor !== this.classTransformers[i].class) continue
+                let {token, encode} = this.classTransformers[i],
+                    encoded = encode(val)
+                return { [this.options.prefix + token]: this._encode(encoded, true) }
+            }
+        }
+        for (let i in this.predTransformers) {
+            let transformer = this.predTransformers[i]
+            if (transformer.pred(val)) {
+                let {token, encode} = transformer,
+                    encoded = encode(val)
+                return { [this.options.prefix + token]: this._encode(encoded, true) }
+            }
+        }
+        {
+            let mapper
+            if (val instanceof Array) mapper = map
+            else if (isPlainObject(val)) mapper = mapValues
+            if (mapper) {
+                if (mutate) {
+                    for (let i in val) val[i] = this._encode(val[i])
+                    return val
+                } else {
+                    return mapper(val, (child) => this._encode(child))
+                }
+            }
+        }
+        return val
     }
 
     makeUnitTransformer(spec) {

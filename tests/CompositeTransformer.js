@@ -3,7 +3,7 @@ import {inspect} from 'util'
 import CompositeTransformer from '../dist/CompositeTransformer'
 import PredicateTransformer from '../dist/PredicateTransformer'
 import ClassTransformer from '../dist/ClassTransformer'
-import {Foo, isFoo, fooEnc, fooDec, Bar, barEnc} from './aux'
+import {Foo, isFoo, fooEnc, fooDec, foo, Bar, barEnc, Tree, treeRepr, tree, treeSpec} from './aux'
 
 
 describe('CompositeTransformer', () => {
@@ -87,6 +87,70 @@ describe('CompositeTransformer', () => {
             assert.lengthOf(t.transformers, 2)
             assert.instanceOf(t.transformers[0], ClassTransformer)
             assert.instanceOf(t.transformers[1], PredicateTransformer)
+        })
+
+    })
+
+    describe('#encode()', () => {
+
+        let t = new CompositeTransformer([treeSpec, {class: Foo, encode: fooEnc}])
+
+        it('does not change scalar values by default', () => {
+            assert.strictEqual(t.encode(3), 3)
+            assert.strictEqual(t.encode('x'), 'x')
+            assert.strictEqual(t.encode(null), null)
+            assert.strictEqual(t.encode(undefined), undefined)
+        })
+
+        it('clones arrays and plain objects by default', () => {
+            let arr = [3],
+                obj = {x: 3}
+            assert.notEqual(t.encode(arr), arr)
+            assert.notEqual(t.encode(obj), obj)
+            assert.deepEqual(t.encode(arr), arr)
+            assert.deepEqual(t.encode(obj), obj)
+        })
+
+        it('converts instance if spec class matches', () => {
+            assert.deepEqual(t.encode(foo), {$Foo: null})
+        })
+
+        it('converts value if spec predicate matches', () => {
+            assert.deepEqual(t.encode(foo), {$Foo: null})
+        })
+
+        it('converts values inside nested arrays and plain objects', () => {
+            let arr = [[foo]],
+                obj = {baz: {bar: foo}}
+            assert.deepEqual(t.encode(arr), [[{$Foo: null}]])
+            assert.deepEqual(t.encode(obj), {baz: {bar: {$Foo: null}}})
+        })
+
+        it('converts values inside encoded objects', () => {
+            assert.deepEqual(t.encode(tree), treeRepr)
+        })
+
+    })
+
+
+    describe('#_encode()', () => {
+
+        let t = new CompositeTransformer([])
+
+        it('copies object and array by default', () => {
+            let obj = {foo: 3, bar: 14},
+                arr = [3, 14]
+            assert.notEqual(t._encode(obj), obj)
+            assert.notEqual(t._encode(arr), arr)
+            assert.deepEqual(t._encode(obj), obj)
+            assert.deepEqual(t._encode(arr), arr)
+        })
+
+        it('modifies object when `mutate` argument is true', () => {
+            let obj = {foo: 3, bar: 14},
+                arr = [3, 14]
+            assert.strictEqual(t._encode(obj, true), obj)
+            assert.strictEqual(t._encode(arr, true), arr)
         })
 
     })
