@@ -13,10 +13,16 @@ module.exports = class CompositeTransformer {
         this.transformers      = specs.map(this.makeUnitTransformer)
         this.predTransformers  = this.transformers.filter((s) => s instanceof PredicateTransformer)
         this.classTransformers = this.transformers.filter((s) => s instanceof ClassTransformer)
+        let err = this.validateConsistency(this.transformers)
+        if (err) throw new Error(`Inconsistent transformers: ${err}`)
     }
 
     makeUnitTransformer(spec) {
-        return spec && spec.class ? new ClassTransformer(spec) : new PredicateTransformer(spec)
+        switch (true) {
+            case spec && !!spec.class: return new ClassTransformer(spec)
+            case spec && !!spec.pred:  return new PredicateTransformer(spec)
+            default: throw new Error('Invalid spec, no class or predicate')
+        }
     }
 
     validateConsistency(transformers) {
