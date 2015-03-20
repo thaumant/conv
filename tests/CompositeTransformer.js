@@ -132,7 +132,6 @@ describe('CompositeTransformer', () => {
 
     })
 
-
     describe('#_encode()', () => {
 
         let t = new CompositeTransformer([])
@@ -151,6 +150,50 @@ describe('CompositeTransformer', () => {
                 arr = [3, 14]
             assert.strictEqual(t._encode(obj, true), obj)
             assert.strictEqual(t._encode(arr, true), arr)
+        })
+
+    })
+
+    describe('#decode()', () => {
+
+        let t = new CompositeTransformer([treeSpec, {class: Foo, encode: fooEnc}])
+
+        it('doesn\'t change scalar values', () => {
+            assert.strictEqual(t.decode(3), 3)
+            assert.strictEqual(t.decode('x'), 'x')
+            assert.strictEqual(t.decode(null), null)
+            assert.strictEqual(t.decode(undefined), undefined)
+        })
+
+        it('clones arrays and plain objects without tokens', () => {
+            let arr = [3],
+                obj = {x: 3}
+            assert.notEqual(t.decode(arr), arr)
+            assert.notEqual(t.decode(obj), obj)
+            assert.deepEqual(t.decode(arr), arr)
+            assert.deepEqual(t.decode(obj), obj)
+        })
+
+        it('recognizes tokens in object keys and decodes values', () => {
+            assert.instanceOf(t.decode({$Foo: null}), Foo)
+        })
+
+        it('recognizes tokens in nested objects and arrays', () => {
+            let encoded1 = [[{$Foo: null}]],
+                decoded1 = [[foo]],
+                encoded2 = {baz: {bar: {$Foo: null}}},
+                decoded2 = {baz: {bar: foo}}
+            assert.deepEqual(t.decode(encoded1), decoded1)
+            assert.deepEqual(t.decode(encoded2), decoded2)
+            assert.instanceOf(t.decode(encoded1)[0][0], Foo)
+            assert.instanceOf(t.decode(encoded2).baz.bar, Foo)
+        })
+
+        it('recreates encoded objects recursively', () => {
+            let decoded = t.decode(treeRepr)
+            assert.instanceOf(decoded.val, Foo)
+            assert.instanceOf(decoded.children[0], Tree)
+            assert.instanceOf(decoded.children[0].val, Foo)
         })
 
     })

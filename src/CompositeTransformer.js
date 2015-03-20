@@ -1,4 +1,4 @@
-const {mapValues, map, isPlainObject} = require('lodash')
+const {cloneDeep, mapValues, map, isPlainObject} = require('lodash')
 
 const UnitTransformer    = require('./UnitTransformer.js'),
     ClassTransformer     = require('./ClassTransformer.js'),
@@ -19,7 +19,9 @@ module.exports = class CompositeTransformer {
         if (err) throw new Error(`Inconsistent transformers: ${err}`)
     }
 
+
     encode(val) { return this._encode(val) }
+
 
     _encode(val, mutate=false) {
         if (val && typeof val.constructor === 'function') {
@@ -54,6 +56,38 @@ module.exports = class CompositeTransformer {
         return val
     }
 
+
+    decode(val) { return this._decode(cloneDeep(val)) }
+
+
+    decodeUnsafe(val) { return this._decode(val) }
+
+
+    _decode(val) {
+        if (val instanceof Array) {
+            for (let i in val) val[i] = this._decode(val[i])
+            return val
+        }
+        if (val instanceof Object) {
+            let _keys = Object.keys(val)
+            if (_keys.length === 1 && _keys[0].startsWith(this.options.prefix)) {
+                let key = _keys[0],
+                    token = key.slice(this.options.prefix.length)
+                for (let i in this.transformers) {
+                    let trans = this.transformers[i]
+                    if (trans.token === token && trans.decode) {
+                        let decodedChildren = this._decode(val[key])
+                        return trans.decode(decodedChildren)
+                    }
+                }
+            }
+            for (let i in val) val[i] = this._decode(val[i])
+            return val
+        }
+        return val
+    }
+
+
     makeUnitTransformer(spec) {
         switch (true) {
             case spec && !!spec.class: return new ClassTransformer(spec)
@@ -61,6 +95,7 @@ module.exports = class CompositeTransformer {
             default: throw new Error('Invalid spec, no class or predicate')
         }
     }
+
 
     validateConsistency(transformers) {
         for (let i in transformers) {

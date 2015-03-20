@@ -37,11 +37,10 @@ export class Tree {
     }
 }
 
-export const fooSpec1 = {token: 'foo', class: Foo,   encode: fooEnc, decode: fooDec}
-export const fooSpec2 = {token: 'foo', class: Foo,   encode: fooEnc}
-export const fooSpec3 = {token: 'foo', pred:  isFoo, encode: fooEnc, decode: fooDec}
+export const fooSpec1 = {token: 'Foo', class: Foo,   encode: fooEnc, decode: fooDec}
+export const fooSpec2 = {token: 'Foo', class: Foo,   encode: fooEnc}
+export const fooSpec3 = {token: 'Foo', pred:  isFoo, encode: fooEnc, decode: fooDec}
 export const treeSpec = {
-    token:  'tree',
     class:  Tree,
     encode: (tree) => ({val: tree.val, children: tree.children}),
     decode: (obj) => new Tree(obj.val, obj.children)
