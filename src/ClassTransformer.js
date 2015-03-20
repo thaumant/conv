@@ -6,9 +6,11 @@ module.exports = class ClassTransformer extends UnitTransformer {
         let err = this.validateSpec(spec)
         if (err) throw new Error(`Failed to create class transformer: ${err}`)
 
-        this.class  = spec.class
-        this.token  = spec.token  || spec.class.name
-        this.decode = spec.decode || (encoded) => new spec.class(encoded)
+        this.class     = spec.class
+        this.token     = spec.token     || spec.class.name
+        this.decode    = spec.decode    || (encoded) => new spec.class(encoded)
+        this.namespace = spec.namespace || null
+        this.path      = (this.namespace ? this.namespace + '.' : '') + this.token
 
         let encode  = spec.encode
         switch (true) {
@@ -27,6 +29,7 @@ module.exports = class ClassTransformer extends UnitTransformer {
             forToken = maybeToken ? ` for ${maybeToken}` : ''
 
         if (s.token && !tokenIsString)                           return `invalid token${forToken}`
+        if (s.namespace && typeof s.namespace !== 'string')      return `invalid namespace${forToken}`
         if ((typeof s.class !== 'function') || !s.class.name)    return `invalid class${forToken}`
         if (s.decode && (typeof s.decode !== 'function'))        return `invalid decoder${forToken}`
         switch (true) {

@@ -27,17 +27,16 @@ module.exports = class CompositeTransformer {
         if (val && typeof val.constructor === 'function') {
             for (let i in this.classTransformers) {
                 if (val.constructor !== this.classTransformers[i].class) continue
-                let {token, encode} = this.classTransformers[i],
-                    encoded = encode(val)
-                return { [this.options.prefix + token]: this._encode(encoded, true) }
+                let trans = this.classTransformers[i],
+                    encoded = trans.encode(val)
+                return { [this.options.prefix + trans.path]: this._encode(encoded, true) }
             }
         }
         for (let i in this.predTransformers) {
-            let transformer = this.predTransformers[i]
-            if (transformer.pred(val)) {
-                let {token, encode} = transformer,
-                    encoded = encode(val)
-                return { [this.options.prefix + token]: this._encode(encoded, true) }
+            let trans = this.predTransformers[i]
+            if (trans.pred(val)) {
+                let encoded = trans.encode(val)
+                return { [this.options.prefix + trans.path]: this._encode(encoded, true) }
             }
         }
         {
@@ -72,10 +71,10 @@ module.exports = class CompositeTransformer {
             let _keys = Object.keys(val)
             if (_keys.length === 1 && _keys[0].startsWith(this.options.prefix)) {
                 let key = _keys[0],
-                    token = key.slice(this.options.prefix.length)
+                    path = key.slice(this.options.prefix.length)
                 for (let i in this.transformers) {
                     let trans = this.transformers[i]
-                    if (trans.token === token && trans.decode) {
+                    if (trans.path === path) {
                         let decodedChildren = this._decode(val[key])
                         return trans.decode(decodedChildren)
                     }
@@ -101,7 +100,9 @@ module.exports = class CompositeTransformer {
         for (let i in transformers) {
             let trans     = transformers[i],
                 token     = trans.token,
-                sameToken = transformers.filter((s) => s.token === token)
+                ns        = trans.namespace,
+                sameNs    = transformers.filter((s) => s.namespace === ns),
+                sameToken = sameNs.filter((s) => s.token === token)
             if (sameToken.length > 1)  return `${sameToken.length} transformers for token ${token}`
             if (trans instanceof ClassTransformer) {
                 let sameClass = transformers.filter((t) => t.class === trans.class)
