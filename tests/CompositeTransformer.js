@@ -3,7 +3,7 @@ import {inspect} from 'util'
 import CompositeTransformer from '../dist/CompositeTransformer'
 import PredicateTransformer from '../dist/PredicateTransformer'
 import ClassTransformer from '../dist/ClassTransformer'
-import {Foo, isFoo, fooEnc, fooDec, foo, Bar, barEnc, Tree, treeRepr, tree, treeSpec} from './aux'
+import {Foo, isFoo, fooEnc, fooDec, foo, Bar, bar, barEnc, Tree, treeRepr, tree, treeSpec} from './aux'
 
 
 describe('CompositeTransformer', () => {
@@ -49,6 +49,12 @@ describe('CompositeTransformer', () => {
                 spec2 = {token: 'Bar', class: Bar, encode: barEnc},
                 ts = [spec1, spec2].map(make)
             assert.strictEqual(undefined, val(ts))
+        })
+
+        it('passes if there are transformers with the same token but different namespaces', () => {
+            let spec1 = {token: 'Foo', class: Foo, encode: fooEnc, namespace: 'foobar'},
+                spec2 = {token: 'Foo', class: Bar, encode: barEnc, namespace: 'bazqux'},
+                ts = [spec1, spec2].map(make)
         })
 
     })
@@ -130,6 +136,11 @@ describe('CompositeTransformer', () => {
             assert.deepEqual(t.encode(tree), treeRepr)
         })
 
+        it('uses namespaces along with token if given', () => {
+            let t = new CompositeTransformer([{class: Bar, namespace: 'foobar'}])
+            assert.deepEqual(t.encode(bar), {'$foobar.Bar': 42})
+        })
+
     })
 
     describe('#_encode()', () => {
@@ -194,6 +205,19 @@ describe('CompositeTransformer', () => {
             assert.instanceOf(decoded.val, Foo)
             assert.instanceOf(decoded.children[0], Tree)
             assert.instanceOf(decoded.children[0].val, Foo)
+        })
+
+        it('recognizes namespaces', () => {
+            let encoded1 = {$Bar: 42},
+                encoded2 = {'$foobar.Bar': 42},
+                t1 = new CompositeTransformer([{class: Bar}]),
+                t2 = new CompositeTransformer([{class: Bar, namespace: 'foobar'}]),
+                decoded1 = t1.decode([encoded1, encoded2]),
+                decoded2 = t2.decode([encoded1, encoded2])
+            assert.instanceOf(decoded1[0], Bar)
+            assert.deepEqual(decoded1[1], encoded2)
+            assert.deepEqual(decoded2[0], encoded1)
+            assert.instanceOf(decoded2[1], Bar)
         })
 
     })

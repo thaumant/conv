@@ -35,13 +35,20 @@ describe('PredicateTransformer', () => {
             assert.strictEqual('missing decoder for Foo', val({token: 'Foo', pred: isFoo, encode: fooEnc, decode: {}}))
         })
 
+        it('tells if namespace is given and it is not a non-empty string', () => {
+            assert.strictEqual('invalid namespace for Foo', val({pred: isFoo, token: 'Foo', namespace: 2}))
+            assert.strictEqual('invalid namespace for Foo', val({pred: isFoo, token: 'Foo', namespace: {}}))
+        })
+
     })
 
 
     describe('#constructor()', () => {
 
-        let s = {token: 'Foo', pred: isFoo, encode: fooEnc, decode: fooDec},
-            t = new PredicateTransformer(s)
+        let s1 = {token: 'Foo', pred: isFoo, encode: fooEnc, decode: fooDec, namespace: 'foobar'},
+            s2 = {token: 'Foo', pred: isFoo, encode: fooEnc, decode: fooDec, namespace: 0},
+            t1 = new PredicateTransformer(s1),
+            t2 = new PredicateTransformer(s2)
 
         it('validates spec with #validateSpec(), throwing it\'s messages as errors', () => {
             let test1 = () => new PredicateTransformer({pred: isFoo}),
@@ -51,19 +58,30 @@ describe('PredicateTransformer', () => {
         })
 
         it('stores spec.token as token property', () => {
-            assert.strictEqual(s.token, t.token)
+            assert.strictEqual(s1.token, t1.token)
         })
 
         it('stores spec.pred as pred method', () => {
-            assert.strictEqual(s.pred, t.pred)
+            assert.strictEqual(s1.pred, t1.pred)
         })
 
         it('stores spec.encode as encode method', () => {
-            assert.strictEqual(s.encode, t.encode)
+            assert.strictEqual(s1.encode, t1.encode)
         })
 
         it('stores spec.decode as decode method', () => {
-            assert.strictEqual(s.decode, t.decode)
+            assert.strictEqual(s1.decode, t1.decode)
+        })
+
+        it('stores spec.namespace as namespace property, or sets to null if falsy', () => {
+            
+            assert.strictEqual(t1.namespace, s1.namespace)
+            assert.strictEqual(t2.namespace, null)
+        })
+
+        it('sets path property as `namespace.token` or just `token`', () => {
+            assert.strictEqual(t1.path, s1.namespace + '.' + s1.token)
+            assert.strictEqual(t2.path, s2.token)
         })
 
     })

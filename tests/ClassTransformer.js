@@ -1,7 +1,7 @@
 import {assert} from 'chai'
 import {inspect} from 'util'
 import ClassTransformer from '../dist/ClassTransformer'
-import {Foo, fooDec, Bar, barDec, barEnc} from './aux'
+import {Foo, fooDec, fooEnc, Bar, barDec, barEnc} from './aux'
 
 describe('ClassTransformer', () => {
 
@@ -47,6 +47,11 @@ describe('ClassTransformer', () => {
 
         it('needs only class param if class has #toJSON() method', () => {
             assert.strictEqual(undefined, val({class: Bar}))
+        })
+
+        it('tells if namespace is given and it is not a non-empty string', () => {
+            assert.strictEqual('invalid namespace for Bar', val({class: Bar, namespace: 2}))
+            assert.strictEqual('invalid namespace for Bar', val({class: Bar, namespace: {}}))
         })
 
     })
@@ -96,6 +101,20 @@ describe('ClassTransformer', () => {
         it('uses #toJSON() if exists and no encoder given', () => {
             let t = new ClassTransformer({class: Bar})
             assert.strictEqual(42, t.encode(new Bar))
+        })
+
+        it('stores spec.namespace as namespace property, or sets to null if falsy', () => {
+            let t1 = new ClassTransformer({class: Bar, namespace: 'foobar'}),
+                t2 = new ClassTransformer({class: Bar})
+            assert.strictEqual('foobar', t1.namespace)
+            assert.strictEqual(null, t2.namespace)
+        })
+
+        it('sets path property as `namespace.token` or just `token`', () => {
+            let t1 = new ClassTransformer({class: Bar, namespace: 'foobar'}),
+                t2 = new ClassTransformer({class: Bar})
+            assert.strictEqual(t1.path, 'foobar.Bar')
+            assert.strictEqual(t2.path, 'Bar')
         })
 
     })
