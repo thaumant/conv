@@ -43,6 +43,13 @@ describe('PredicateTransformer', () => {
         let s = {token: 'Foo', pred: isFoo, encode: fooEnc, decode: fooDec},
             t = new PredicateTransformer(s)
 
+        it('validates spec with #validateSpec(), throwing it\'s messages as errors', () => {
+            let test1 = () => new PredicateTransformer({pred: isFoo}),
+                test2 = () => new PredicateTransformer({token: 'Foo', pred: isFoo})
+            assert.throw(test1, 'Failed to create predicate transformer: missing token')
+            assert.throw(test2, 'Failed to create predicate transformer: missing encoder for Foo')
+        })
+
         it('stores spec.token as token property', () => {
             assert.strictEqual(s.token, t.token)
         })
