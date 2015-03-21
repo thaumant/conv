@@ -15,13 +15,13 @@ module.exports = class PredicateTransformer extends UnitTransformer {
 
     validateSpec(s) {
         let err = super.validateSpec(s)
-        if (err)                            return err
-        if (!s.token)                       return 'missing token'
-        if (typeof s.token  !== 'string')   return 'invalid token'
+        if (err)                                return err
+        if (!s.token)                           return 'missing token'
+        if (!this.isValidName(s.token))         return 'invalid token'
         if (s.namespace &&
-           typeof s.namespace !== 'string') return `invalid namespace for ${s.token}`
-        if (typeof s.pred   !== 'function') return `invalid predicate for ${s.token}`
-        if (typeof s.encode !== 'function') return `missing encoder for ${s.token}`
-        if (typeof s.decode !== 'function') return `missing decoder for ${s.token}`
+           !this.isValidNamespace(s.namespace)) return `invalid namespace for ${s.token}`
+        if (typeof s.pred   !== 'function')     return `invalid predicate for ${s.token}`
+        if (typeof s.encode !== 'function')     return `missing encoder for ${s.token}`
+        if (typeof s.decode !== 'function')     return `missing decoder for ${s.token}`
     }
 }

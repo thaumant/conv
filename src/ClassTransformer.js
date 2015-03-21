@@ -24,12 +24,11 @@ module.exports = class ClassTransformer extends UnitTransformer {
         let err = super.validateSpec(s)
         if (err) return err
 
-        let tokenIsString = typeof s.token === 'string',
-            maybeToken = (tokenIsString && s.token) || (s.class && s.class.name),
+        let maybeToken = (this.isValidName(s.token) && s.token) || (s.class && s.class.name),
             forToken = maybeToken ? ` for ${maybeToken}` : ''
 
-        if (s.token && !tokenIsString)                           return `invalid token${forToken}`
-        if (s.namespace && typeof s.namespace !== 'string')      return `invalid namespace${forToken}`
+        if (s.token && !this.isValidName(s.token))               return `invalid token${forToken}`
+        if (s.namespace && !this.isValidNamespace(s.namespace))  return `invalid namespace${forToken}`
         if ((typeof s.class !== 'function') || !s.class.name)    return `invalid class${forToken}`
         if (s.decode && (typeof s.decode !== 'function'))        return `invalid decoder${forToken}`
         switch (true) {
