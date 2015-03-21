@@ -7,16 +7,17 @@ describe('ClassTransformer', () => {
 
     describe('#validateSpec()', () => {
 
-        let val = ClassTransformer.prototype.validateSpec
+        let val = ClassTransformer.prototype.validateSpec.bind(ClassTransformer.prototype)
 
         it('calls UnitTransformer#validateSpec() at first', () => {
             assert.strictEqual('spec is not a plain object', val([]))
             assert.strictEqual('spec is missing class or predicate', val({}))
         })
 
-        it('tells if token is given and it is not a string', () => {
+        it('tells if token is given and it is not a valid string', () => {
             assert.strictEqual('invalid token for Foo', val({class: Foo, token: 2}))
             assert.strictEqual('invalid token for Foo', val({class: Foo, token: {}}))
+            assert.strictEqual('invalid token for Foo', val({class: Foo, token: '$%^'}))
         })
 
         it('tells if class is not a function with name property', () => {
@@ -52,6 +53,7 @@ describe('ClassTransformer', () => {
         it('tells if namespace is given and it is not a non-empty string', () => {
             assert.strictEqual('invalid namespace for Bar', val({class: Bar, namespace: 2}))
             assert.strictEqual('invalid namespace for Bar', val({class: Bar, namespace: {}}))
+            assert.strictEqual('invalid namespace for Bar', val({class: Bar, namespace: '$%^'}))
         })
 
     })

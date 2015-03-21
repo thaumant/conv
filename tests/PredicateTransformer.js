@@ -7,17 +7,18 @@ describe('PredicateTransformer', () => {
 
     describe('#validateSpec()', () => {
 
-        let val = PredicateTransformer.prototype.validateSpec
+        let val = PredicateTransformer.prototype.validateSpec.bind(PredicateTransformer.prototype)
 
         it('calls UnitTransformer#validateSpec() at first', () => {
             assert.strictEqual('spec is not a plain object', val([]))
             assert.strictEqual('spec is missing class or predicate', val({}))
         })
 
-        it('tells if token is not a non-empty string', () => {
+        it('tells if token is not a valid string', () => {
             assert.strictEqual('missing token', val({pred: isFoo}))
             assert.strictEqual('invalid token', val({pred: isFoo, token: 2}))
             assert.strictEqual('invalid token', val({pred: isFoo, token: {}}))
+            assert.strictEqual('invalid token', val({pred: isFoo, token: '$%^'}))
         })
 
         it('tells if predicate is not a function', () => {
@@ -35,9 +36,10 @@ describe('PredicateTransformer', () => {
             assert.strictEqual('missing decoder for Foo', val({token: 'Foo', pred: isFoo, encode: fooEnc, decode: {}}))
         })
 
-        it('tells if namespace is given and it is not a non-empty string', () => {
+        it('tells if namespace is given and it is not a valid string', () => {
             assert.strictEqual('invalid namespace for Foo', val({pred: isFoo, token: 'Foo', namespace: 2}))
             assert.strictEqual('invalid namespace for Foo', val({pred: isFoo, token: 'Foo', namespace: {}}))
+            assert.strictEqual('invalid namespace for Foo', val({pred: isFoo, token: 'Foo', namespace: '#$%'}))
         })
 
     })
@@ -46,9 +48,12 @@ describe('PredicateTransformer', () => {
     describe('#constructor()', () => {
 
         let s1 = {token: 'Foo', pred: isFoo, encode: fooEnc, decode: fooDec, namespace: 'foobar'},
-            s2 = {token: 'Foo', pred: isFoo, encode: fooEnc, decode: fooDec, namespace: 0},
-            t1 = new PredicateTransformer(s1),
-            t2 = new PredicateTransformer(s2)
+            s2 = {token: 'Foo', pred: isFoo, encode: fooEnc, decode: fooDec, namespace: 0}
+
+        console.log('before', s1)
+        let t1 = new PredicateTransformer(s1)
+        console.log('after')
+        let t2 = new PredicateTransformer(s2)
 
         it('validates spec with #validateSpec(), throwing it\'s messages as errors', () => {
             let test1 = () => new PredicateTransformer({pred: isFoo}),
