@@ -222,4 +222,33 @@ describe('CompositeT', () => {
 
     })
 
+    describe('#decodeUnsafe()', () => {
+
+        let t = new CompositeT([treeSpec, {class: Foo, encode: fooEnc}])
+
+        it('doesn\'t change scalar values', () => {
+            assert.strictEqual(t.decodeUnsafe(3), 3)
+            assert.strictEqual(t.decodeUnsafe('x'), 'x')
+            assert.strictEqual(t.decodeUnsafe(null), null)
+            assert.strictEqual(t.decodeUnsafe(undefined), undefined)
+        })
+
+        it('doesn\'t change arrays and plain objects without tokens', () => {
+            let arr = [3],
+                obj = {x: 3}
+            assert.strictEqual(t.decodeUnsafe(arr), arr)
+            assert.strictEqual(t.decodeUnsafe(obj), obj)
+        })
+
+        it('mutates structures instead of cloning it', () => {
+            let encoded = {foo: [ {$Foo: null} ]},
+                decoded = t.decodeUnsafe(encoded)
+            assert.strictEqual(decoded, encoded)
+            assert.strictEqual(decoded.foo, encoded.foo)
+            assert.strictEqual(decoded.foo[0], encoded.foo[0])
+            assert.instanceOf(decoded.foo[0], Foo)
+            assert.instanceOf(encoded.foo[0], Foo)
+        })
+
+    })
 })
