@@ -1,21 +1,21 @@
 const {cloneDeep, mapValues, map, isPlainObject} = require('lodash')
 
-const UnitTransformer    = require('./UnitTransformer.js'),
-    ClassTransformer     = require('./ClassTransformer.js'),
-    PredicateTransformer = require('./PredicateTransformer.js')
+const UnitT    = require('./UnitT.js'),
+    UnitClassT = require('./UnitClassT.js'),
+    UnitPredT  = require('./UnitPredT.js')
 
 
-module.exports = class CompositeTransformer {
+module.exports = class CompositeT {
     constructor(specs, options={}) {
         this.options = {
             prefix:     options.prefix || '$',
             serializer: options.serializer || JSON
         }
         if (!(specs instanceof Array)) throw new Error('Expected array of specs')
-        this.transformers      = specs.map(this.makeUnitTransformer)
-        this.predTransformers  = this.transformers.filter((s) => s instanceof PredicateTransformer)
-        this.classTransformers = this.transformers.filter((s) => s instanceof ClassTransformer)
-        let err = this.validateConsistency(this.transformers)
+        this.unitTs  = specs.map(this.makeUnitT)
+        this.predTs  = this.unitTs.filter((s) => s instanceof UnitPredT)
+        this.classTs = this.unitTs.filter((s) => s instanceof UnitClassT)
+        let err = this.validateConsistency(this.unitTs)
         if (err) throw new Error(`Inconsistent transformers: ${err}`)
     }
 
@@ -25,15 +25,15 @@ module.exports = class CompositeTransformer {
 
     _encode(val, mutate=false) {
         if (val && typeof val.constructor === 'function') {
-            for (let i in this.classTransformers) {
-                if (val.constructor !== this.classTransformers[i].class) continue
-                let trans = this.classTransformers[i],
+            for (let i in this.classTs) {
+                if (val.constructor !== this.classTs[i].class) continue
+                let trans = this.classTs[i],
                     encoded = trans.encode(val)
                 return { [this.options.prefix + trans.path]: this._encode(encoded, true) }
             }
         }
-        for (let i in this.predTransformers) {
-            let trans = this.predTransformers[i]
+        for (let i in this.predTs) {
+            let trans = this.predTs[i]
             if (trans.pred(val)) {
                 let encoded = trans.encode(val)
                 return { [this.options.prefix + trans.path]: this._encode(encoded, true) }
@@ -72,8 +72,8 @@ module.exports = class CompositeTransformer {
             if (_keys.length === 1 && _keys[0].startsWith(this.options.prefix)) {
                 let key = _keys[0],
                     path = key.slice(this.options.prefix.length)
-                for (let i in this.transformers) {
-                    let trans = this.transformers[i]
+                for (let i in this.unitTs) {
+                    let trans = this.unitTs[i]
                     if (trans.path === path) {
                         let decodedChildren = this._decode(val[key])
                         return trans.decode(decodedChildren)
@@ -87,25 +87,25 @@ module.exports = class CompositeTransformer {
     }
 
 
-    makeUnitTransformer(spec) {
+    makeUnitT(spec) {
         switch (true) {
-            case spec && !!spec.class: return new ClassTransformer(spec)
-            case spec && !!spec.pred:  return new PredicateTransformer(spec)
+            case spec && !!spec.class: return new UnitClassT(spec)
+            case spec && !!spec.pred:  return new UnitPredT(spec)
             default: throw new Error('Invalid spec, no class or predicate')
         }
     }
 
 
-    validateConsistency(transformers) {
-        for (let i in transformers) {
-            let trans     = transformers[i],
+    validateConsistency(unitTs) {
+        for (let i in unitTs) {
+            let trans     = unitTs[i],
                 token     = trans.token,
                 ns        = trans.namespace,
-                sameNs    = transformers.filter((s) => s.namespace === ns),
+                sameNs    = unitTs.filter((s) => s.namespace === ns),
                 sameToken = sameNs.filter((s) => s.token === token)
             if (sameToken.length > 1)  return `${sameToken.length} transformers for token ${token}`
-            if (trans instanceof ClassTransformer) {
-                let sameClass = transformers.filter((t) => t.class === trans.class)
+            if (trans instanceof UnitClassT) {
+                let sameClass = unitTs.filter((t) => t.class === trans.class)
                 if (sameClass.length > 1) return `${sameClass.length} transformers for class ${trans.class.name}`
             }
         }

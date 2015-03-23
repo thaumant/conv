@@ -1,7 +1,7 @@
-const UnitTransformer = require('./UnitTransformer')
+const UnitT = require('./UnitT')
 
 
-module.exports = class ClassTransformer extends UnitTransformer {
+module.exports = class UnitClassT extends UnitT {
     constructor(spec) {
         let err = this.validateSpec(spec)
         if (err) throw new Error(`Failed to create class transformer: ${err}`)

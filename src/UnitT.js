@@ -1,7 +1,7 @@
 const {isPlainObject} = require('lodash')
 
 
-module.exports = class UnitTransformer {
+module.exports = class UnitT {
     constructor(spec) { }
 
     validateSpec(s) {

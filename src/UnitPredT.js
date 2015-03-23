@@ -1,7 +1,7 @@
-const UnitTransformer = require('./UnitTransformer')
+const UnitT = require('./UnitT')
 
 
-module.exports = class PredicateTransformer extends UnitTransformer {
+module.exports = class UnitPredT extends UnitT {
     constructor(spec) {
         let err = this.validateSpec(spec)
         if (err) throw new Error(`Failed to create predicate transformer: ${err}`)

@@ -1,13 +1,13 @@
 import {assert} from 'chai'
 import {inspect} from 'util'
-import UnitTransformer from '../dist/UnitTransformer'
+import UnitT from '../dist/UnitT'
 import {Foo, fooSpec1} from './aux'
 
-describe('UnitTransformer', () => {
+describe('UnitT', () => {
 
     describe('#validateSpec()', () => {
 
-        let val = UnitTransformer.prototype.validateSpec
+        let val = UnitT.prototype.validateSpec
 
         it('tells if spec is not a plain object', () => {
             assert.strictEqual('spec is not a plain object', val(null))
@@ -27,7 +27,7 @@ describe('UnitTransformer', () => {
 
     describe('#isValidName()', () => {
 
-        let val = UnitTransformer.prototype.isValidName
+        let val = UnitT.prototype.isValidName
 
         it('returns false when given invalid name for js variable', () => {
             assert.strictEqual(false, val('1'))
@@ -48,7 +48,7 @@ describe('UnitTransformer', () => {
 
     describe('#isValidNamespace', () => {
 
-        let val = UnitTransformer.prototype.isValidNamespace.bind(UnitTransformer.prototype)
+        let val = UnitT.prototype.isValidNamespace.bind(UnitT.prototype)
 
         it('returns false when given a non-string', () => {
             assert.strictEqual(false, val())

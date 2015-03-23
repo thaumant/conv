@@ -1,15 +1,15 @@
 import {assert} from 'chai'
 import {inspect} from 'util'
-import PredicateTransformer from '../dist/PredicateTransformer'
+import UnitPredT from '../dist/UnitPredT'
 import {isFoo, fooDec, fooEnc} from './aux'
 
-describe('PredicateTransformer', () => {
+describe('UnitPredT', () => {
 
     describe('#validateSpec()', () => {
 
-        let val = PredicateTransformer.prototype.validateSpec.bind(PredicateTransformer.prototype)
+        let val = UnitPredT.prototype.validateSpec.bind(UnitPredT.prototype)
 
-        it('calls UnitTransformer#validateSpec() at first', () => {
+        it('calls UnitT#validateSpec() at first', () => {
             assert.strictEqual('spec is not a plain object', val([]))
             assert.strictEqual('spec is missing class or predicate', val({}))
         })
@@ -50,14 +50,12 @@ describe('PredicateTransformer', () => {
         let s1 = {token: 'Foo', pred: isFoo, encode: fooEnc, decode: fooDec, namespace: 'foobar'},
             s2 = {token: 'Foo', pred: isFoo, encode: fooEnc, decode: fooDec, namespace: 0}
 
-        console.log('before', s1)
-        let t1 = new PredicateTransformer(s1)
-        console.log('after')
-        let t2 = new PredicateTransformer(s2)
+        let t1 = new UnitPredT(s1)
+        let t2 = new UnitPredT(s2)
 
         it('validates spec with #validateSpec(), throwing it\'s messages as errors', () => {
-            let test1 = () => new PredicateTransformer({pred: isFoo}),
-                test2 = () => new PredicateTransformer({token: 'Foo', pred: isFoo})
+            let test1 = () => new UnitPredT({pred: isFoo}),
+                test2 = () => new UnitPredT({token: 'Foo', pred: isFoo})
             assert.throw(test1, 'Failed to create predicate transformer: missing token')
             assert.throw(test2, 'Failed to create predicate transformer: missing encoder for Foo')
         })
