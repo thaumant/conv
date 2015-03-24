@@ -87,6 +87,39 @@ module.exports = class CompositeT {
     }
 
 
+    extendWith(specs, options) {
+        if (!(specs instanceof Array)) return this.extendWith([specs], options)
+        let result = []
+        this.unitTs.concat(specs).forEach((spec) => {
+            if (spec instanceof CompositeT) {
+                spec.unitTs.forEach((unitT) => result.push(unitT))
+            } else {
+                result.push(spec)
+            }
+        })
+        return new CompositeT(result, options || this.options)
+    }
+
+
+    overrideBy(specs, options) {
+        if (!(specs instanceof Array)) return this.overrideBy([specs], options)
+        let result = []
+        this.unitTs.concat(specs).reverse().forEach((spec) => {
+            if (spec instanceof CompositeT) {
+                spec.unitTs.reverse().forEach((unitT) => {
+                    result.unshift(unitT)
+                    if (this.validateConsistency(result)) result.shift()
+                })
+                options = spec.options
+            } else {
+                result.unshift(spec)
+                if (this.validateConsistency(result)) result.shift()
+            }
+        })
+        return new CompositeT(result, options || this.options)
+    }
+
+
     makeUnitT(spec) {
         switch (true) {
             case spec && !!spec.class: return new UnitClassT(spec)

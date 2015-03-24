@@ -15,6 +15,18 @@ export class Bar {
     bar() { return 24 }
 }
 
+export class Baz {
+    constructor() {}
+    toString() { return '<baz>' }
+    toJSON() { return 42 }
+}
+
+export class Qux {
+    constructor() {}
+    toString() { return '<baz>' }
+    toJSON() { return 42 }
+}
+
 export function isFoo(x) { return x instanceof Foo }
 export function fooEnc(x) { return null }
 export function fooDec() { return new Foo() }
