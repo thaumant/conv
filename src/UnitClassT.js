@@ -21,6 +21,7 @@ module.exports = class UnitClassT extends UnitT {
     }
 
     validateSpec(s) {
+        if (s instanceof UnitClassT) return
         let err = super.validateSpec(s)
         if (err) return err
 

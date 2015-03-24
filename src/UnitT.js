@@ -5,6 +5,7 @@ module.exports = class UnitT {
     constructor(spec) { }
 
     validateSpec(s) {
+        if (s instanceof UnitT)  return
         if (!isPlainObject(s))   return 'spec is not a plain object'
         if (!s.class && !s.pred) return 'spec is missing class or predicate'
     }

@@ -14,6 +14,7 @@ module.exports = class UnitPredT extends UnitT {
     }
 
     validateSpec(s) {
+        if (s instanceof UnitPredT)             return
         let err = super.validateSpec(s)
         if (err)                                return err
         if (!s.token)                           return 'missing token'

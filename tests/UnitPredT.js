@@ -9,6 +9,10 @@ describe('UnitPredT', () => {
 
         let val = UnitPredT.prototype.validateSpec.bind(UnitPredT.prototype)
 
+        it('passes when given instance of UnitPredT', () => {
+            assert.strictEqual(undefined, val(new UnitPredT({token: 'Foo', pred: isFoo, encode: fooEnc, decode: fooDec})))
+        })
+
         it('calls UnitT#validateSpec() at first', () => {
             assert.strictEqual('spec is not a plain object', val([]))
             assert.strictEqual('spec is missing class or predicate', val({}))

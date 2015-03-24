@@ -9,6 +9,10 @@ describe('UnitT', () => {
 
         let val = UnitT.prototype.validateSpec
 
+        it('passes when given instance of UnitT', () => {
+            assert.strictEqual(undefined, val(new UnitT()))
+        })
+
         it('tells if spec is not a plain object', () => {
             assert.strictEqual('spec is not a plain object', val(null))
             assert.strictEqual('spec is not a plain object', val(2))
