@@ -19,6 +19,11 @@ describe('CompositeT', () => {
             assert.instanceOf(make(spec2), UnitPredT)
         })
 
+        it('accepts instance of UnitT and returns it unmodified', () => {
+            let t = new UnitClassT({class: Bar})
+            assert.strictEqual(t, make(t))
+        })
+
         it('throws an error if cannot determine which transformer to create', () => {
             assert.throws(() => make({}), 'Invalid spec, no class or predicate')
         })

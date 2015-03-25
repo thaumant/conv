@@ -122,8 +122,9 @@ module.exports = class CompositeT {
 
     makeUnitT(spec) {
         switch (true) {
-            case spec && !!spec.class: return new UnitClassT(spec)
-            case spec && !!spec.pred:  return new UnitPredT(spec)
+            case spec instanceof UnitT: return spec
+            case spec && !!spec.class:  return new UnitClassT(spec)
+            case spec && !!spec.pred:   return new UnitPredT(spec)
             default: throw new Error('Invalid spec, no class or predicate')
         }
     }
