@@ -30,7 +30,7 @@ module.exports = class UnitClassT extends UnitT {
 
         if (s.token && !this.isValidName(s.token))               return `invalid token${forToken}`
         if (s.namespace && !this.isValidNamespace(s.namespace))  return `invalid namespace${forToken}`
-        if ((typeof s.class !== 'function') || !s.class.name)    return `invalid class${forToken}`
+        if (typeof s.class !== 'function')                       return `invalid class${forToken}`
         if (s.decode && (typeof s.decode !== 'function'))        return `invalid decoder${forToken}`
         switch (true) {
             case !s.encode &&

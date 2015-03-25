@@ -24,9 +24,8 @@ describe('UnitClassT', () => {
             assert.strictEqual('invalid token for Foo', val({class: Foo, token: '$%^'}))
         })
 
-        it('tells if class is not a function with name property', () => {
+        it('tells if class is not a function', () => {
             assert.strictEqual('invalid class for Foo', val({token: 'Foo', class: 2}))
-            assert.strictEqual('invalid class for Foo', val({token: 'Foo', class: () => null}))
         })
 
         it('tells if decoder is given and it is not a function', () => {
