@@ -28,6 +28,7 @@ module.exports = class UnitClassT extends UnitT {
         let maybeToken = (this.isValidName(s.token) && s.token) || (s.class && s.class.name),
             forToken = maybeToken ? ` for ${maybeToken}` : ''
 
+        if (!maybeToken)                                         return 'missing token and no class name'
         if (s.token && !this.isValidName(s.token))               return `invalid token${forToken}`
         if (s.namespace && !this.isValidNamespace(s.namespace))  return `invalid namespace${forToken}`
         if (typeof s.class !== 'function')                       return `invalid class${forToken}`

@@ -24,6 +24,10 @@ describe('UnitClassT', () => {
             assert.strictEqual('invalid token for Foo', val({class: Foo, token: '$%^'}))
         })
 
+        it('tells when no token given and constructor has no name', () => {
+            assert.strictEqual('missing token and no class name', val({class: () => null, encode: fooEnc}))
+        })
+
         it('tells if class is not a function', () => {
             assert.strictEqual('invalid class for Foo', val({token: 'Foo', class: 2}))
         })
