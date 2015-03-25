@@ -24,10 +24,9 @@
     "url": "https://github.com/thaumant/jx/issues"
   },
   "homepage": "https://github.com/thaumant/jx",
-  "dependencies": {
-    "lodash": "^3.5.0"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "chai": "^2.1.1",
     "gulp": "^3.8.11",
     "gulp-babel": "^4.0.0",
     "gulp-mocha": "^2.0.0",

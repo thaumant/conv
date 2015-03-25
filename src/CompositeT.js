@@ -1,5 +1,3 @@
-const {cloneDeep, mapValues, map, isPlainObject} = require('lodash')
-
 const UnitT    = require('./UnitT.js'),
     UnitClassT = require('./UnitClassT.js'),
     UnitPredT  = require('./UnitPredT.js')
@@ -24,42 +22,67 @@ module.exports = class CompositeT {
 
 
     _encode(val, mutate=false) {
-        if (val && typeof val.constructor === 'function') {
+        let isObject = val && typeof val == 'object',
+            isPlain  = isObject && (!val.constructor || val.constructor === Object)
+        if (isObject && !isPlain) {
             for (let i in this.classTs) {
                 if (val.constructor !== this.classTs[i].class) continue
-                let trans = this.classTs[i],
-                    encoded = trans.encode(val)
-                return { [this.options.prefix + trans.path]: this._encode(encoded, true) }
+                let classT = this.classTs[i],
+                    encoded = classT.encode(val)
+                return { [this.options.prefix + classT.path]: this._encode(encoded, true) }
             }
         }
         for (let i in this.predTs) {
-            let trans = this.predTs[i]
-            if (trans.pred(val)) {
-                let encoded = trans.encode(val)
-                return { [this.options.prefix + trans.path]: this._encode(encoded, true) }
+            let predT = this.predTs[i]
+            if (predT.pred(val)) {
+                let encoded = predT.encode(val)
+                return { [this.options.prefix + predT.path]: this._encode(encoded, true) }
             }
         }
-        {
-            let mapper
-            if (val instanceof Array) mapper = map
-            else if (isPlainObject(val)) mapper = mapValues
-            if (mapper) {
-                if (mutate) {
-                    for (let i in val) val[i] = this._encode(val[i])
-                    return val
-                } else {
-                    return mapper(val, (child) => this._encode(child))
+        if (val instanceof Array) {
+            if (mutate) {
+                for (let i in val) val[i] = this._encode(val[i])
+                return val
+            } else {
+                return val.map((child) => this._encode(child))
+            }
+        } else if (isPlain) {
+            if (mutate) {
+                for (let key in val) {
+                    if (val.hasOwnProperty(key)) val[key] = this._encode(val[key])
                 }
+                return val
+            } else {
+                let copy = {}
+                for (let key in val) {
+                    if (val.hasOwnProperty(key)) copy[key] = this._encode(val[key])
+                }
+                return copy
             }
         }
         return val
     }
 
 
-    decode(val) { return this._decode(cloneDeep(val)) }
+    decode(val) { return this._decode(this._cloneStructure(val)) }
 
 
     decodeUnsafe(val) { return this._decode(val) }
+
+
+    _cloneStructure(val) {
+        if (val instanceof Array) {
+            return val.map((child) => this._cloneStructure(child))
+        } else if (val && typeof val == 'object') {
+            let copy = {}
+            for (let key in val) {
+                if (val.hasOwnProperty(key)) copy[key] = this._cloneStructure(val[key])
+            }
+            return copy
+        } else {
+            return val
+        }
+    }
 
 
     _decode(val) {
@@ -68,9 +91,9 @@ module.exports = class CompositeT {
             return val
         }
         if (val instanceof Object) {
-            let _keys = Object.keys(val)
-            if (_keys.length === 1 && _keys[0].startsWith(this.options.prefix)) {
-                let key = _keys[0],
+            let keys = Object.keys(val)
+            if (keys.length === 1 && keys[0].startsWith(this.options.prefix)) {
+                let key = keys[0],
                     path = key.slice(this.options.prefix.length)
                 for (let i in this.unitTs) {
                     let trans = this.unitTs[i]
