@@ -8,15 +8,15 @@ module.exports = class UnitClassT extends UnitT {
 
         this.class     = spec.class
         this.token     = spec.token     || spec.class.name
-        this.decode    = spec.decode    || (encoded) => new spec.class(encoded)
+        this.restore   = spec.restore   || (dumped) => new spec.class(dumped)
         this.namespace = spec.namespace || null
         this.path      = (this.namespace ? this.namespace + '.' : '') + this.token
 
-        let encode  = spec.encode
+        let dump  = spec.dump
         switch (true) {
-            case typeof encode === 'function': this.encode = encode; break
-            case typeof encode === 'string':   this.encode = (val) => val[encode](); break
-            default:                           this.encode = (val) => val.toJSON()
+            case typeof dump === 'function': this.dump = dump; break
+            case typeof dump === 'string':   this.dump = (val) => val[dump](); break
+            default:                         this.dump = (val) => val.toJSON()
         }
     }
 
@@ -32,14 +32,14 @@ module.exports = class UnitClassT extends UnitT {
         if (s.token && !this.isValidName(s.token))               return `invalid token${forToken}`
         if (s.namespace && !this.isValidNamespace(s.namespace))  return `invalid namespace${forToken}`
         if (typeof s.class !== 'function')                       return `invalid class${forToken}`
-        if (s.decode && (typeof s.decode !== 'function'))        return `invalid decoder${forToken}`
+        if (s.restore && (typeof s.restore !== 'function'))      return `invalid restore method${forToken}`
         switch (true) {
-            case !s.encode &&
+            case !s.dump &&
                  typeof s.class.prototype.toJSON === 'function': break
-            case !s.encode:                                      return `missing encoder${forToken}`
-            case typeof s.encode === 'function':                 break
-            case typeof s.encode === 'string':                   break
-            default:                                             return `invalid encoder${forToken}`
+            case !s.dump:                                        return `missing dump method${forToken}`
+            case typeof s.dump === 'function':                   break
+            case typeof s.dump === 'string':                     break
+            default:                                             return `invalid dump method${forToken}`
         }
     }
 }

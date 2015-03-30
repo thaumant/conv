@@ -18,44 +18,44 @@ module.exports = class CompositeT {
     }
 
 
-    encode(val) { return this._encode(val) }
+    dump(val) { return this._dump(val) }
 
 
-    _encode(val, mutate=false) {
+    _dump(val, mutate=false) {
         let isObject = val && typeof val == 'object',
             isPlain  = isObject && (!val.constructor || val.constructor === Object)
         for (let i in this.predTs) {
             let predT = this.predTs[i]
             if (predT.pred(val)) {
-                let encoded = predT.encode(val)
-                return { [this.options.prefix + predT.path]: this._encode(encoded, true) }
+                let dumped = predT.dump(val)
+                return { [this.options.prefix + predT.path]: this._dump(dumped, true) }
             }
         }
         if (isObject && !isPlain) {
             for (let i in this.classTs) {
                 if (val.constructor !== this.classTs[i].class) continue
                 let classT = this.classTs[i],
-                    encoded = classT.encode(val)
-                return { [this.options.prefix + classT.path]: this._encode(encoded, true) }
+                    dumped = classT.dump(val)
+                return { [this.options.prefix + classT.path]: this._dump(dumped, true) }
             }
         }
         if (val instanceof Array) {
             if (mutate) {
-                for (let i in val) val[i] = this._encode(val[i])
+                for (let i in val) val[i] = this._dump(val[i])
                 return val
             } else {
-                return val.map((child) => this._encode(child))
+                return val.map((child) => this._dump(child))
             }
         } else if (isPlain) {
             if (mutate) {
                 for (let key in val) {
-                    if (val.hasOwnProperty(key)) val[key] = this._encode(val[key])
+                    if (val.hasOwnProperty(key)) val[key] = this._dump(val[key])
                 }
                 return val
             } else {
                 let copy = {}
                 for (let key in val) {
-                    if (val.hasOwnProperty(key)) copy[key] = this._encode(val[key])
+                    if (val.hasOwnProperty(key)) copy[key] = this._dump(val[key])
                 }
                 return copy
             }
@@ -64,10 +64,10 @@ module.exports = class CompositeT {
     }
 
 
-    decode(val) { return this._decode(this._cloneStructure(val)) }
+    restore(val) { return this._restore(this._cloneStructure(val)) }
 
 
-    decodeUnsafe(val) { return this._decode(val) }
+    restoreUnsafe(val) { return this._restore(val) }
 
 
     _cloneStructure(val) {
@@ -85,9 +85,9 @@ module.exports = class CompositeT {
     }
 
 
-    _decode(val) {
+    _restore(val) {
         if (val instanceof Array) {
-            for (let i in val) val[i] = this._decode(val[i])
+            for (let i in val) val[i] = this._restore(val[i])
             return val
         }
         if (val instanceof Object) {
@@ -98,12 +98,12 @@ module.exports = class CompositeT {
                 for (let i in this.unitTs) {
                     let trans = this.unitTs[i]
                     if (trans.path === path) {
-                        let decodedChildren = this._decode(val[key])
-                        return trans.decode(decodedChildren)
+                        let restoredChildren = this._restore(val[key])
+                        return trans.restore(restoredChildren)
                     }
                 }
             }
-            for (let i in val) val[i] = this._decode(val[i])
+            for (let i in val) val[i] = this._restore(val[i])
             return val
         }
         return val

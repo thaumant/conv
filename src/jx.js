@@ -3,27 +3,27 @@ const CompositeT = require('./CompositeT')
 
 let specs = [
     {token: 'Date', class: Date},
-    {token: 'RegExp', class: RegExp, encode: (r) => r.source}
+    {token: 'RegExp', class: RegExp, dump: (r) => r.source}
 ]
 
 if (typeof Buffer === 'function')
     specs.push({
         token: 'Buffer',
         class: Buffer,
-        encode: (b) => b.toString('base64'),
-        decode: (s) => new Buffer(s, 'base64')
+        dump: (b) => b.toString('base64'),
+        restore: (s) => new Buffer(s, 'base64')
     })
 
 if (typeof Map === 'function')
     specs.push({
         token: 'Map',
         class: Map,
-        encode: (m) => {
+        dump: (m) => {
             let pairs = []
             m.forEach((val, key) => pairs.push([key, val]))
             return pairs
         },
-        decode: (pairs) => {
+        restore: (pairs) => {
             let m = new Map()
             for (let i in pairs) m.set(pairs[i][0], pairs[i][1])
             return m
@@ -34,12 +34,12 @@ if (typeof Set === 'function') {
     specs.push({
         token: 'Set',
         class: Set,
-        encode: (s) => {
+        dump: (s) => {
             let arr = []
             s.forEach((val) => arr.push(val))
             return arr
         },
-        decode: (arr) => {
+        restore: (arr) => {
             let s = new Set()
             for (let i in arr) s.add(arr[i])
             return s

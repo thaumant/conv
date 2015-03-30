@@ -1,7 +1,7 @@
 import {assert} from 'chai'
 import {inspect} from 'util'
 import UnitClassT from '../dist/UnitClassT'
-import {Foo, fooDec, fooEnc, Bar, barDec, barEnc} from './aux'
+import {Foo, fooRest, fooDump, Bar, barRest, barDump} from './aux'
 
 describe('UnitClassT', () => {
 
@@ -25,32 +25,32 @@ describe('UnitClassT', () => {
         })
 
         it('tells when no token given and constructor has no name', () => {
-            assert.strictEqual('missing token and no class name', val({class: () => null, encode: fooEnc}))
+            assert.strictEqual('missing token and no class name', val({class: () => null, dump: fooDump}))
         })
 
         it('tells if class is not a function', () => {
             assert.strictEqual('invalid class for Foo', val({token: 'Foo', class: 2}))
         })
 
-        it('tells if decoder is given and it is not a function', () => {
-            assert.strictEqual('invalid decoder for Foo', val({token: 'Foo', class: Foo, decode: 2}))
+        it('tells if restore method is given and it is not a function', () => {
+            assert.strictEqual('invalid restore method for Foo', val({token: 'Foo', class: Foo, restore: 2}))
         })
 
-        it('tells if encoder is given and it is not a function or string', () => {
-            assert.strictEqual('invalid encoder for Foo', val({token: 'Foo', class: Foo, decode: fooDec, encode: 2}))
-            assert.strictEqual('invalid encoder for Foo', val({token: 'Foo', class: Foo, decode: fooDec, encode: {}}))
+        it('tells if dump method is given and it is not a function or string', () => {
+            assert.strictEqual('invalid dump method for Foo', val({token: 'Foo', class: Foo, restore: fooRest, dump: 2}))
+            assert.strictEqual('invalid dump method for Foo', val({token: 'Foo', class: Foo, restore: fooRest, dump: {}}))
         })
 
-        it('tells if encoder is missing and class has no #toJSON() method', () => {
-            assert.strictEqual('missing encoder for Foo', val({token: 'Foo', class: Foo, decode: fooDec}))
+        it('tells if dump method is missing and class has no #toJSON() method', () => {
+            assert.strictEqual('missing dump method for Foo', val({token: 'Foo', class: Foo, restore: fooRest}))
         })
 
-        it('passes if no encoder given but clas has #toJSON() method', () => {
-            assert.strictEqual(undefined, val({class: Bar, decode: barDec}))
+        it('passes if no dump method given but clas has #toJSON() method', () => {
+            assert.strictEqual(undefined, val({class: Bar, restore: barRest}))
         })
 
-        it('passes if falsy decoder or token given', () => {
-            assert.strictEqual(undefined, val({class: Bar, encode: barEnc}))
+        it('passes if falsy restore method or token given', () => {
+            assert.strictEqual(undefined, val({class: Bar, dump: barDump}))
         })
 
         it('needs only class param if class has #toJSON() method', () => {
@@ -70,9 +70,9 @@ describe('UnitClassT', () => {
 
         it('performs #validateSpec()', () => {
             let test1 = () => new UnitClassT({class: Foo, token: 2}),
-                test2 = () => new UnitClassT({token: 'Foo', class: Foo, decode: fooDec})
+                test2 = () => new UnitClassT({token: 'Foo', class: Foo, restore: fooRest})
             assert.throw(test1, 'Failed to create class transformer: invalid token for Foo')
-            assert.throw(test2, 'Failed to create class transformer: missing encoder for Foo')
+            assert.throw(test2, 'Failed to create class transformer: missing dump method for Foo')
         })
 
         it('stores spec.class as spec property', () => {
@@ -87,29 +87,29 @@ describe('UnitClassT', () => {
             assert.strictEqual('Bar', t2.token)
         })
 
-        it('stores decoder if given, otherwise make decoder that calls class constructor', () => {
-            let t1 = new UnitClassT({class: Bar, decode: barDec}),
+        it('stores restore method if given, otherwise make restore method that calls class constructor', () => {
+            let t1 = new UnitClassT({class: Bar, restore: barRest}),
                 t2 = new UnitClassT({class: Bar}),
-                decoded = t2.decode(3)
-            assert.strictEqual(barDec, t1.decode)
-            assert.instanceOf(decoded, Bar)
-            assert.strictEqual(3, decoded.arg1)
-            assert.strictEqual(undefined, decoded.arg2)
+                restored = t2.restore(3)
+            assert.strictEqual(barRest, t1.restore)
+            assert.instanceOf(restored, Bar)
+            assert.strictEqual(3, restored.arg1)
+            assert.strictEqual(undefined, restored.arg2)
         })
 
-        it('stores encoder as is if function given', () => {
-            let t = new UnitClassT({class: Bar, encode: barEnc})
-            assert.strictEqual(barEnc, t.encode)
+        it('stores dump method as is if function given', () => {
+            let t = new UnitClassT({class: Bar, dump: barDump})
+            assert.strictEqual(barDump, t.dump)
         })
 
-        it('makes encoder that calls specified method if spec.encoder is string', () => {
-            let t = new UnitClassT({class: Bar, encode: 'bar'})
-            assert.strictEqual(24, t.encode(new Bar))
+        it('makes dump method that calls specified method if spec.dump method is string', () => {
+            let t = new UnitClassT({class: Bar, dump: 'bar'})
+            assert.strictEqual(24, t.dump(new Bar))
         })
 
-        it('uses #toJSON() if exists and no encoder given', () => {
+        it('uses #toJSON() if exists and no dump method given', () => {
             let t = new UnitClassT({class: Bar})
-            assert.strictEqual(42, t.encode(new Bar))
+            assert.strictEqual(42, t.dump(new Bar))
         })
 
         it('stores spec.namespace as namespace property, or sets to null if falsy', () => {

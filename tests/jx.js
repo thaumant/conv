@@ -2,59 +2,62 @@ import jx from '../dist/jx'
 import {assert} from 'chai'
 import {inspect} from 'util'
 
+let testBuffer = typeof Buffer !== 'function',
+    testMap = typeof Map !== 'function' || !Map.prototype.forEach,
+    testSet = typeof Set !== 'function' || !Set.prototype.forEach
 
 describe('jx', () => {
 
     it('does not modify scalar values', () => {
-        assert.strictEqual(3, jx.decode(3))
-        assert.strictEqual(3, jx.encode(3))
-        assert.strictEqual('foo', jx.decode('foo'))
-        assert.strictEqual('foo', jx.encode('foo'))
+        assert.strictEqual(3, jx.restore(3))
+        assert.strictEqual(3, jx.dump(3))
+        assert.strictEqual('foo', jx.restore('foo'))
+        assert.strictEqual('foo', jx.dump('foo'))
     })
 
-    it('encodes and decodes Date', () => {
+    it('dumps and restores Date', () => {
         let date = new Date,
-            encoded = date.toJSON(),
-            decoded = jx.decode({$Date: encoded})
-        assert.deepEqual({$Date: encoded}, jx.encode(date))
-        assert.instanceOf(decoded, Date)
-        assert.strictEqual(date.toString(), decoded.toString())
+            dumped = date.toJSON(),
+            restored = jx.restore({$Date: dumped})
+        assert.deepEqual({$Date: dumped}, jx.dump(date))
+        assert.instanceOf(restored, Date)
+        assert.strictEqual(date.toString(), restored.toString())
     })
 
-    it('encodes and decodes Buffer if presented', typeof Buffer !== 'function' ? undefined : () => {
+    it('dumps and restores Buffer if presented', testBuffer ? undefined : () => {
         let buffer = new Buffer([3, 14, 15, 92, 6]),
-            encoded = buffer.toString('base64'),
-            decoded = jx.decode({$Buffer: encoded})
-        assert.deepEqual({$Buffer: encoded}, jx.encode(buffer))
-        assert.instanceOf(decoded, Buffer)
-        assert.strictEqual(buffer.inspect(), decoded.inspect())
+            dumped = buffer.toString('base64'),
+            restored = jx.restore({$Buffer: dumped})
+        assert.deepEqual({$Buffer: dumped}, jx.dump(buffer))
+        assert.instanceOf(restored, Buffer)
+        assert.strictEqual(buffer.inspect(), restored.inspect())
     })
 
-    it('encodes and decodes Map if presented', typeof Map !== 'function' || !Map.prototype.forEach ? undefined : () => {
+    it('dumps and restores Map if presented', testMap ? undefined : () => {
         let map = new Map()
         map.set(3, 'foo')
         map.set('bar', 'baz')
-        let encoded = []
-        map.forEach((val, key) => encoded.push([key, val]))
-        let decoded = jx.decode({$Map: encoded})
-        assert.deepEqual({$Map: encoded}, jx.encode(map))
-        assert.instanceOf(decoded, Map)
-        assert.strictEqual(2, decoded.size)
-        assert.strictEqual('foo', decoded.get(3))
-        assert.strictEqual('baz', decoded.get('bar'))
+        let dumped = []
+        map.forEach((val, key) => dumped.push([key, val]))
+        let restored = jx.restore({$Map: dumped})
+        assert.deepEqual({$Map: dumped}, jx.dump(map))
+        assert.instanceOf(restored, Map)
+        assert.strictEqual(2, restored.size)
+        assert.strictEqual('foo', restored.get(3))
+        assert.strictEqual('baz', restored.get('bar'))
     })
 
-    it('encodes and decodes Set if presented', typeof Set !== 'function' || !Set.prototype.forEach ? undefined : () => {
+    it('dumps and restores Set if presented', testSet ? undefined : () => {
         let set = new Set()
         set.add(3)
         set.add('foo')
-        let encoded = [3, 'foo'],
-            decoded = jx.decode({$Set: encoded})
-        assert.deepEqual({$Set: encoded}, jx.encode(set))
-        assert.instanceOf(decoded, Set)
-        assert.strictEqual(2, decoded.size)
-        assert(true, decoded.has(3))
-        assert(true, decoded.has('foo'))
+        let dumped = [3, 'foo'],
+            restored = jx.restore({$Set: dumped})
+        assert.deepEqual({$Set: dumped}, jx.dump(set))
+        assert.instanceOf(restored, Set)
+        assert.strictEqual(2, restored.size)
+        assert(true, restored.has(3))
+        assert(true, restored.has('foo'))
     })
 
 })

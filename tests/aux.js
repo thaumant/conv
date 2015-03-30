@@ -28,12 +28,12 @@ export class Qux {
 }
 
 export function isFoo(x) { return x instanceof Foo }
-export function fooEnc(x) { return null }
-export function fooDec() { return new Foo() }
+export function fooDump(x) { return null }
+export function fooRest() { return new Foo() }
 
 export function isBar(x) { return x instanceof Bar }
-export function barEnc(x) { return null }
-export function barDec() { return new Bar() }
+export function barDump(x) { return null }
+export function barRest() { return new Bar() }
 
 
 export class Tree {
@@ -49,13 +49,13 @@ export class Tree {
     }
 }
 
-export const fooSpec1 = {token: 'Foo', class: Foo,   encode: fooEnc, decode: fooDec}
-export const fooSpec2 = {token: 'Foo', class: Foo,   encode: fooEnc}
-export const fooSpec3 = {token: 'Foo', pred:  isFoo, encode: fooEnc, decode: fooDec}
+export const fooSpec1 = {token: 'Foo', class: Foo,   dump: fooDump, restore: fooRest}
+export const fooSpec2 = {token: 'Foo', class: Foo,   dump: fooDump}
+export const fooSpec3 = {token: 'Foo', pred:  isFoo, dump: fooDump, restore: fooRest}
 export const treeSpec = {
     class:  Tree,
-    encode: (tree) => ({val: tree.val, children: tree.children}),
-    decode: (obj) => new Tree(obj.val, obj.children)
+    dump: (tree) => ({val: tree.val, children: tree.children}),
+    restore: (obj) => new Tree(obj.val, obj.children)
 }
 
 // export const fooT  = new Transformer([fooSpec1])

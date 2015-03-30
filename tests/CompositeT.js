@@ -3,7 +3,7 @@ import {inspect} from 'util'
 import CompositeT from '../dist/CompositeT'
 import UnitPredT from '../dist/UnitPredT'
 import UnitClassT from '../dist/UnitClassT'
-import {Foo, isFoo, fooEnc, fooDec, foo, Bar, bar, barEnc, Tree, treeRepr, tree, treeSpec, Baz, Qux} from './aux'
+import {Foo, isFoo, fooDump, fooRest, foo, Bar, bar, barDump, Tree, treeRepr, tree, treeSpec, Baz, Qux} from './aux'
 
 
 describe('CompositeT', () => {
@@ -14,7 +14,7 @@ describe('CompositeT', () => {
 
         it('accepts spec and returns correspondent UnitT', () => {
             let spec1 = {class: Bar},
-                spec2 = {token: 'Foo', pred: isFoo, encode: fooEnc, decode: fooDec}
+                spec2 = {token: 'Foo', pred: isFoo, dump: fooDump, restore: fooRest}
             assert.instanceOf(make(spec1), UnitClassT)
             assert.instanceOf(make(spec2), UnitPredT)
         })
@@ -36,29 +36,29 @@ describe('CompositeT', () => {
             val  = CompositeT.prototype.validateConsistency
 
         it('tells if there are more than one transformer with the same token', () => {
-            let spec1 = {token: 'Foo', class: Foo, encode: fooEnc},
-                spec2 = {token: 'Foo', class: Bar, encode: barEnc},
+            let spec1 = {token: 'Foo', class: Foo, dump: fooDump},
+                spec2 = {token: 'Foo', class: Bar, dump: barDump},
                 ts = [spec1, spec2].map(make)
             assert.strictEqual('2 transformers for token Foo', val(ts))
         })
 
         it('tells if some class occurs more than one time', () => {
-            let spec1 = {token: 'Foo', class: Foo, encode: fooEnc},
-                spec2 = {token: 'Bar', class: Foo, encode: fooEnc},
+            let spec1 = {token: 'Foo', class: Foo, dump: fooDump},
+                spec2 = {token: 'Bar', class: Foo, dump: fooDump},
                 ts = [spec1, spec2].map(make)
             assert.strictEqual('2 transformers for class Foo', val(ts))
         })
 
         it('passes valid array of transformers', () => {
-            let spec1 = {token: 'Foo', class: Foo, encode: fooEnc},
-                spec2 = {token: 'Bar', class: Bar, encode: barEnc},
+            let spec1 = {token: 'Foo', class: Foo, dump: fooDump},
+                spec2 = {token: 'Bar', class: Bar, dump: barDump},
                 ts = [spec1, spec2].map(make)
             assert.strictEqual(undefined, val(ts))
         })
 
         it('passes if there are transformers with the same token but different namespaces', () => {
-            let spec1 = {token: 'Foo', class: Foo, encode: fooEnc, namespace: 'foobar'},
-                spec2 = {token: 'Foo', class: Bar, encode: barEnc, namespace: 'bazqux'},
+            let spec1 = {token: 'Foo', class: Foo, dump: fooDump, namespace: 'foobar'},
+                spec2 = {token: 'Foo', class: Bar, dump: barDump, namespace: 'bazqux'},
                 ts = [spec1, spec2].map(make)
         })
 
@@ -93,7 +93,7 @@ describe('CompositeT', () => {
 
         it('creates array of UnitT instances from array of valid specs', () => {
             let spec1 = {class: Bar},
-                spec2 = {token: 'Foo', pred: isFoo, encode: fooEnc, decode: fooDec},
+                spec2 = {token: 'Foo', pred: isFoo, dump: fooDump, restore: fooRest},
                 t = new CompositeT([spec1, spec2])
             assert.lengthOf(t.unitTs, 2)
             assert.instanceOf(t.unitTs[0], UnitClassT)
@@ -102,171 +102,171 @@ describe('CompositeT', () => {
 
     })
 
-    describe('#encode()', () => {
+    describe('#dump()', () => {
 
-        let t = new CompositeT([treeSpec, {class: Foo, encode: fooEnc}])
+        let t = new CompositeT([treeSpec, {class: Foo, dump: fooDump}])
 
         it('does not change scalar values by default', () => {
-            assert.strictEqual(t.encode(3), 3)
-            assert.strictEqual(t.encode('x'), 'x')
-            assert.strictEqual(t.encode(null), null)
-            assert.strictEqual(t.encode(undefined), undefined)
+            assert.strictEqual(t.dump(3), 3)
+            assert.strictEqual(t.dump('x'), 'x')
+            assert.strictEqual(t.dump(null), null)
+            assert.strictEqual(t.dump(undefined), undefined)
         })
 
         it('clones arrays and plain objects by default', () => {
             let arr = [3],
                 obj = {x: 3}
-            assert.notEqual(t.encode(arr), arr)
-            assert.notEqual(t.encode(obj), obj)
-            assert.deepEqual(t.encode(arr), arr)
-            assert.deepEqual(t.encode(obj), obj)
+            assert.notEqual(t.dump(arr), arr)
+            assert.notEqual(t.dump(obj), obj)
+            assert.deepEqual(t.dump(arr), arr)
+            assert.deepEqual(t.dump(obj), obj)
         })
 
         it('converts instance if spec class matches', () => {
-            assert.deepEqual(t.encode(foo), {$Foo: null})
+            assert.deepEqual(t.dump(foo), {$Foo: null})
         })
 
         it('converts value if spec predicate matches', () => {
-            assert.deepEqual(t.encode(foo), {$Foo: null})
+            assert.deepEqual(t.dump(foo), {$Foo: null})
         })
 
         it('converts values inside nested arrays and plain objects', () => {
             let arr = [[foo]],
                 obj = {baz: {bar: foo}}
-            assert.deepEqual(t.encode(arr), [[{$Foo: null}]])
-            assert.deepEqual(t.encode(obj), {baz: {bar: {$Foo: null}}})
+            assert.deepEqual(t.dump(arr), [[{$Foo: null}]])
+            assert.deepEqual(t.dump(obj), {baz: {bar: {$Foo: null}}})
         })
 
-        it('converts values inside encoded objects', () => {
-            assert.deepEqual(t.encode(tree), treeRepr)
+        it('converts values inside dumped objects', () => {
+            assert.deepEqual(t.dump(tree), treeRepr)
         })
 
         it('uses namespaces along with token if given', () => {
             let t = new CompositeT([{class: Bar, namespace: 'foobar'}])
-            assert.deepEqual(t.encode(bar), {'$foobar.Bar': 42})
+            assert.deepEqual(t.dump(bar), {'$foobar.Bar': 42})
         })
 
         it('applies predicate transformers before class ts', () => {
             let t = new CompositeT([
-                {token: 'Foo', class: Foo, encode: fooEnc, decode: fooDec},
-                {token: 'Bar', pred: isFoo, encode: fooEnc, decode: fooDec}
+                {token: 'Foo', class: Foo, dump: fooDump, restore: fooRest},
+                {token: 'Bar', pred: isFoo, dump: fooDump, restore: fooRest}
             ])
-            assert.deepEqual({$Bar: null}, t.encode(new Foo))
+            assert.deepEqual({$Bar: null}, t.dump(new Foo))
         })
 
     })
 
-    describe('#_encode()', () => {
+    describe('#_dump()', () => {
 
         let t = new CompositeT([])
 
         it('copies object and array by default', () => {
             let obj = {foo: 3, bar: 14},
                 arr = [3, 14]
-            assert.notEqual(t._encode(obj), obj)
-            assert.notEqual(t._encode(arr), arr)
-            assert.deepEqual(t._encode(obj), obj)
-            assert.deepEqual(t._encode(arr), arr)
+            assert.notEqual(t._dump(obj), obj)
+            assert.notEqual(t._dump(arr), arr)
+            assert.deepEqual(t._dump(obj), obj)
+            assert.deepEqual(t._dump(arr), arr)
         })
 
         it('modifies object when `mutate` argument is true', () => {
             let obj = {foo: 3, bar: 14},
                 arr = [3, 14]
-            assert.strictEqual(t._encode(obj, true), obj)
-            assert.strictEqual(t._encode(arr, true), arr)
+            assert.strictEqual(t._dump(obj, true), obj)
+            assert.strictEqual(t._dump(arr, true), arr)
         })
 
     })
 
-    describe('#decode()', () => {
+    describe('#restore()', () => {
 
-        let t = new CompositeT([treeSpec, {class: Foo, encode: fooEnc}])
+        let t = new CompositeT([treeSpec, {class: Foo, dump: fooDump}])
 
         it('doesn\'t change scalar values', () => {
-            assert.strictEqual(t.decode(3), 3)
-            assert.strictEqual(t.decode('x'), 'x')
-            assert.strictEqual(t.decode(null), null)
-            assert.strictEqual(t.decode(undefined), undefined)
+            assert.strictEqual(t.restore(3), 3)
+            assert.strictEqual(t.restore('x'), 'x')
+            assert.strictEqual(t.restore(null), null)
+            assert.strictEqual(t.restore(undefined), undefined)
         })
 
         it('clones arrays and plain objects without tokens', () => {
             let arr = [3],
                 obj = {x: 3}
-            assert.notEqual(t.decode(arr), arr)
-            assert.notEqual(t.decode(obj), obj)
-            assert.deepEqual(t.decode(arr), arr)
-            assert.deepEqual(t.decode(obj), obj)
+            assert.notEqual(t.restore(arr), arr)
+            assert.notEqual(t.restore(obj), obj)
+            assert.deepEqual(t.restore(arr), arr)
+            assert.deepEqual(t.restore(obj), obj)
         })
 
-        it('recognizes tokens in object keys and decodes values', () => {
-            assert.instanceOf(t.decode({$Foo: null}), Foo)
+        it('recognizes tokens in object keys and restores values', () => {
+            assert.instanceOf(t.restore({$Foo: null}), Foo)
         })
 
         it('recognizes tokens in nested objects and arrays', () => {
-            let encoded1 = [[{$Foo: null}]],
-                decoded1 = [[foo]],
-                encoded2 = {baz: {bar: {$Foo: null}}},
-                decoded2 = {baz: {bar: foo}}
-            assert.deepEqual(t.decode(encoded1), decoded1)
-            assert.deepEqual(t.decode(encoded2), decoded2)
-            assert.instanceOf(t.decode(encoded1)[0][0], Foo)
-            assert.instanceOf(t.decode(encoded2).baz.bar, Foo)
+            let dumped1 = [[{$Foo: null}]],
+                restored1 = [[foo]],
+                dumped2 = {baz: {bar: {$Foo: null}}},
+                restored2 = {baz: {bar: foo}}
+            assert.deepEqual(t.restore(dumped1), restored1)
+            assert.deepEqual(t.restore(dumped2), restored2)
+            assert.instanceOf(t.restore(dumped1)[0][0], Foo)
+            assert.instanceOf(t.restore(dumped2).baz.bar, Foo)
         })
 
-        it('recreates encoded objects recursively', () => {
-            let decoded = t.decode(treeRepr)
-            assert.instanceOf(decoded.val, Foo)
-            assert.instanceOf(decoded.children[0], Tree)
-            assert.instanceOf(decoded.children[0].val, Foo)
+        it('recreates dumped objects recursively', () => {
+            let restored = t.restore(treeRepr)
+            assert.instanceOf(restored.val, Foo)
+            assert.instanceOf(restored.children[0], Tree)
+            assert.instanceOf(restored.children[0].val, Foo)
         })
 
         it('recognizes namespaces', () => {
-            let encoded1 = {$Bar: 42},
-                encoded2 = {'$foobar.Bar': 42},
+            let dumped1 = {$Bar: 42},
+                dumped2 = {'$foobar.Bar': 42},
                 t1 = new CompositeT([{class: Bar}]),
                 t2 = new CompositeT([{class: Bar, namespace: 'foobar'}]),
-                decoded1 = t1.decode([encoded1, encoded2]),
-                decoded2 = t2.decode([encoded1, encoded2])
-            assert.instanceOf(decoded1[0], Bar)
-            assert.deepEqual(decoded1[1], encoded2)
-            assert.deepEqual(decoded2[0], encoded1)
-            assert.instanceOf(decoded2[1], Bar)
+                restored1 = t1.restore([dumped1, dumped2]),
+                restored2 = t2.restore([dumped1, dumped2])
+            assert.instanceOf(restored1[0], Bar)
+            assert.deepEqual(restored1[1], dumped2)
+            assert.deepEqual(restored2[0], dumped1)
+            assert.instanceOf(restored2[1], Bar)
         })
 
     })
 
-    describe('#decodeUnsafe()', () => {
+    describe('#restoreUnsafe()', () => {
 
-        let t = new CompositeT([treeSpec, {class: Foo, encode: fooEnc}])
+        let t = new CompositeT([treeSpec, {class: Foo, dump: fooDump}])
 
         it('doesn\'t change scalar values', () => {
-            assert.strictEqual(t.decodeUnsafe(3), 3)
-            assert.strictEqual(t.decodeUnsafe('x'), 'x')
-            assert.strictEqual(t.decodeUnsafe(null), null)
-            assert.strictEqual(t.decodeUnsafe(undefined), undefined)
+            assert.strictEqual(t.restoreUnsafe(3), 3)
+            assert.strictEqual(t.restoreUnsafe('x'), 'x')
+            assert.strictEqual(t.restoreUnsafe(null), null)
+            assert.strictEqual(t.restoreUnsafe(undefined), undefined)
         })
 
         it('doesn\'t change arrays and plain objects without tokens', () => {
             let arr = [3],
                 obj = {x: 3}
-            assert.strictEqual(t.decodeUnsafe(arr), arr)
-            assert.strictEqual(t.decodeUnsafe(obj), obj)
+            assert.strictEqual(t.restoreUnsafe(arr), arr)
+            assert.strictEqual(t.restoreUnsafe(obj), obj)
         })
 
         it('mutates structures instead of cloning it', () => {
-            let encoded = {foo: [ {$Foo: null} ]},
-                decoded = t.decodeUnsafe(encoded)
-            assert.strictEqual(decoded, encoded)
-            assert.strictEqual(decoded.foo, encoded.foo)
-            assert.strictEqual(decoded.foo[0], encoded.foo[0])
-            assert.instanceOf(decoded.foo[0], Foo)
-            assert.instanceOf(encoded.foo[0], Foo)
+            let dumped = {foo: [ {$Foo: null} ]},
+                restored = t.restoreUnsafe(dumped)
+            assert.strictEqual(restored, dumped)
+            assert.strictEqual(restored.foo, dumped.foo)
+            assert.strictEqual(restored.foo[0], dumped.foo[0])
+            assert.instanceOf(restored.foo[0], Foo)
+            assert.instanceOf(dumped.foo[0], Foo)
         })
 
     })
 
     describe('#extendWith()', () => {
-            let fooT = new CompositeT([{class: Foo, encode: () => null}]),
+            let fooT = new CompositeT([{class: Foo, dump: () => null}]),
                 barT = new CompositeT([{class: Bar}]),
                 bazT = new CompositeT([{class: Baz}])
 
@@ -298,15 +298,15 @@ describe('CompositeT', () => {
         })
 
         it('throws an error if some specs have the same token and namespace', () => {
-            let t1 = new CompositeT([{token: 'Foo', namespace: 'foobar', class: Foo, encode: fooEnc}]),
+            let t1 = new CompositeT([{token: 'Foo', namespace: 'foobar', class: Foo, dump: fooDump}]),
                 t2 = new CompositeT([{token: 'Foo', namespace: 'foobar', class: Bar}]),
                 test = () => t1.extendWith(t2)
             assert.throw(test, 'Inconsistent transformers: 2 transformers for token Foo')
         })
 
         it('throws an error if some spec have the same class', () => {
-            let t1 = new CompositeT([{token: 'Foo', class: Foo, encode: fooEnc}]),
-                t2 = new CompositeT([{token: 'Bar', class: Foo, encode: fooEnc}]),
+            let t1 = new CompositeT([{token: 'Foo', class: Foo, dump: fooDump}]),
+                t2 = new CompositeT([{token: 'Bar', class: Foo, dump: fooDump}]),
                 test = () => t1.extendWith(t2)
             assert.throw(test, 'Inconsistent transformers: 2 transformers for class Foo')
         })
@@ -314,7 +314,7 @@ describe('CompositeT', () => {
     })
 
     describe('#overrideBy()', () => {
-            let fooT = new CompositeT([{class: Foo, encode: () => null}]),
+            let fooT = new CompositeT([{class: Foo, dump: () => null}]),
                 barT = new CompositeT([{class: Bar}]),
                 bazT = new CompositeT([{class: Baz}])
 
@@ -346,7 +346,7 @@ describe('CompositeT', () => {
         })
 
         it('discards the former when specs have the same token and namespace', () => {
-            let t1 = new CompositeT([{token: 'Foo', namespace: 'foobar', class: Foo, encode: fooEnc}]),
+            let t1 = new CompositeT([{token: 'Foo', namespace: 'foobar', class: Foo, dump: fooDump}]),
                 t2 = new CompositeT([{token: 'Foo', namespace: 'foobar', class: Bar}]),
                 t3 = t1.overrideBy(t2)
             assert.lengthOf(t3.unitTs, 1)
@@ -354,8 +354,8 @@ describe('CompositeT', () => {
         })
 
         it('discards the former when specs have the same class', () => {
-            let t1 = new CompositeT([{token: 'Foo', class: Foo, encode: fooEnc}]),
-                t2 = new CompositeT([{token: 'Bar', class: Foo, encode: fooEnc}]),
+            let t1 = new CompositeT([{token: 'Foo', class: Foo, dump: fooDump}]),
+                t2 = new CompositeT([{token: 'Bar', class: Foo, dump: fooDump}]),
                 t3 = t1.overrideBy(t2)
             assert.lengthOf(t3.unitTs, 1)
             assert.strictEqual('Bar', t3.unitTs[0].token)

@@ -1,7 +1,7 @@
 import {assert} from 'chai'
 import {inspect} from 'util'
 import UnitPredT from '../dist/UnitPredT'
-import {isFoo, fooDec, fooEnc} from './aux'
+import {isFoo, fooRest, fooDump} from './aux'
 
 describe('UnitPredT', () => {
 
@@ -10,7 +10,7 @@ describe('UnitPredT', () => {
         let val = UnitPredT.prototype.validateSpec.bind(UnitPredT.prototype)
 
         it('passes when given instance of UnitPredT', () => {
-            assert.strictEqual(undefined, val(new UnitPredT({token: 'Foo', pred: isFoo, encode: fooEnc, decode: fooDec})))
+            assert.strictEqual(undefined, val(new UnitPredT({token: 'Foo', pred: isFoo, dump: fooDump, restore: fooRest})))
         })
 
         it('calls UnitT#validateSpec() at first', () => {
@@ -30,14 +30,14 @@ describe('UnitPredT', () => {
             assert.strictEqual('invalid predicate for Foo', val({token: 'Foo', pred: {}}))
         })
 
-        it('tells if encoder is not a function', () => {
-            assert.strictEqual('missing encoder for Foo', val({token: 'Foo', pred: isFoo}))
-            assert.strictEqual('missing encoder for Foo', val({token: 'Foo', pred: isFoo, encode: 2}))
+        it('tells if dump method is not a function', () => {
+            assert.strictEqual('missing dump method for Foo', val({token: 'Foo', pred: isFoo}))
+            assert.strictEqual('missing dump method for Foo', val({token: 'Foo', pred: isFoo, dump: 2}))
         })
 
-        it('tells if decoder is not a function', () => {
-            assert.strictEqual('missing decoder for Foo', val({token: 'Foo', pred: isFoo, encode: fooEnc}))
-            assert.strictEqual('missing decoder for Foo', val({token: 'Foo', pred: isFoo, encode: fooEnc, decode: {}}))
+        it('tells if restore method is not a function', () => {
+            assert.strictEqual('missing restore method for Foo', val({token: 'Foo', pred: isFoo, dump: fooDump}))
+            assert.strictEqual('missing restore method for Foo', val({token: 'Foo', pred: isFoo, dump: fooDump, restore: {}}))
         })
 
         it('tells if namespace is given and it is not a valid string', () => {
@@ -51,8 +51,8 @@ describe('UnitPredT', () => {
 
     describe('#constructor()', () => {
 
-        let s1 = {token: 'Foo', pred: isFoo, encode: fooEnc, decode: fooDec, namespace: 'foobar'},
-            s2 = {token: 'Foo', pred: isFoo, encode: fooEnc, decode: fooDec, namespace: 0}
+        let s1 = {token: 'Foo', pred: isFoo, dump: fooDump, restore: fooRest, namespace: 'foobar'},
+            s2 = {token: 'Foo', pred: isFoo, dump: fooDump, restore: fooRest, namespace: 0}
 
         let t1 = new UnitPredT(s1)
         let t2 = new UnitPredT(s2)
@@ -61,7 +61,7 @@ describe('UnitPredT', () => {
             let test1 = () => new UnitPredT({pred: isFoo}),
                 test2 = () => new UnitPredT({token: 'Foo', pred: isFoo})
             assert.throw(test1, 'Failed to create predicate transformer: missing token')
-            assert.throw(test2, 'Failed to create predicate transformer: missing encoder for Foo')
+            assert.throw(test2, 'Failed to create predicate transformer: missing dump method for Foo')
         })
 
         it('stores spec.token as token property', () => {
@@ -72,12 +72,12 @@ describe('UnitPredT', () => {
             assert.strictEqual(s1.pred, t1.pred)
         })
 
-        it('stores spec.encode as encode method', () => {
-            assert.strictEqual(s1.encode, t1.encode)
+        it('stores spec.dump as dump method', () => {
+            assert.strictEqual(s1.dump, t1.dump)
         })
 
-        it('stores spec.decode as decode method', () => {
-            assert.strictEqual(s1.decode, t1.decode)
+        it('stores spec.restore as restore method', () => {
+            assert.strictEqual(s1.restore, t1.restore)
         })
 
         it('stores spec.namespace as namespace property, or sets to null if falsy', () => {
