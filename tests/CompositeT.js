@@ -146,6 +146,14 @@ describe('CompositeT', () => {
             assert.deepEqual(t.encode(bar), {'$foobar.Bar': 42})
         })
 
+        it('applies predicate transformers before class ts', () => {
+            let t = new CompositeT([
+                {token: 'Foo', class: Foo, encode: fooEnc, decode: fooDec},
+                {token: 'Bar', pred: isFoo, encode: fooEnc, decode: fooDec}
+            ])
+            assert.deepEqual({$Bar: null}, t.encode(new Foo))
+        })
+
     })
 
     describe('#_encode()', () => {

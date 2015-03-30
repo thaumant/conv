@@ -24,19 +24,19 @@ module.exports = class CompositeT {
     _encode(val, mutate=false) {
         let isObject = val && typeof val == 'object',
             isPlain  = isObject && (!val.constructor || val.constructor === Object)
+        for (let i in this.predTs) {
+            let predT = this.predTs[i]
+            if (predT.pred(val)) {
+                let encoded = predT.encode(val)
+                return { [this.options.prefix + predT.path]: this._encode(encoded, true) }
+            }
+        }
         if (isObject && !isPlain) {
             for (let i in this.classTs) {
                 if (val.constructor !== this.classTs[i].class) continue
                 let classT = this.classTs[i],
                     encoded = classT.encode(val)
                 return { [this.options.prefix + classT.path]: this._encode(encoded, true) }
-            }
-        }
-        for (let i in this.predTs) {
-            let predT = this.predTs[i]
-            if (predT.pred(val)) {
-                let encoded = predT.encode(val)
-                return { [this.options.prefix + predT.path]: this._encode(encoded, true) }
             }
         }
         if (val instanceof Array) {
