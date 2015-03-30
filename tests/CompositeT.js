@@ -362,4 +362,43 @@ describe('CompositeT', () => {
         })
 
     })
+
+    describe('#withOptions()', () => {
+
+        it('creates new instance of CompositeT with the same unitTs', () => {
+            let orig = new CompositeT([{class: Bar}]),
+                copy = orig.withOptions({})
+            assert.instanceOf(copy, CompositeT)
+            assert.notEqual(copy, orig)
+            assert.strictEqual(1, copy.unitTs.length)
+            assert.strictEqual(orig.unitTs[0], copy.unitTs[0])
+        })
+
+        it('does not change options when given empty object or non-object', () => {
+            let serializer = {parse: () => null, stringify: () => null},
+                prefix = '?',
+                orig = new CompositeT([{class: Bar}], {serializer: serializer, prefix: prefix}),
+                copy1 = orig.withOptions({}),
+                copy2 = orig.withOptions(),
+                copy3 = orig.withOptions(3)
+            assert.strictEqual(prefix, copy1.options.prefix)
+            assert.strictEqual(prefix, copy2.options.prefix)
+            assert.strictEqual(prefix, copy3.options.prefix)
+            assert.strictEqual(serializer, copy1.options.serializer)
+            assert.strictEqual(serializer, copy2.options.serializer)
+            assert.strictEqual(serializer, copy3.options.serializer)
+        })
+
+        it('make a copy of transformer with new prefix or serializer', () => {
+            let orig = new CompositeT([{class: Bar}]),
+                newPrefix = '?',
+                newSerializer = {parse: () => null, stringify: () => null},
+                copy1 = orig.withOptions({prefix: newPrefix}),
+                copy2 = orig.withOptions({serializer: newSerializer})
+            assert.strictEqual(newPrefix, copy1.options.prefix)
+            assert.strictEqual(newSerializer, copy2.options.serializer)
+        })
+
+    })
+
 })

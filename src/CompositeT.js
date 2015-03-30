@@ -143,6 +143,14 @@ module.exports = class CompositeT {
     }
 
 
+    withOptions(opts={}) {
+        return new CompositeT(this.unitTs, {
+            prefix:     opts.prefix     || this.options.prefix,
+            serializer: opts.serializer || this.options.serializer
+        })
+    }
+
+
     makeUnitT(spec) {
         switch (true) {
             case spec instanceof UnitT: return spec
