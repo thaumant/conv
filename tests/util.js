@@ -1,6 +1,6 @@
 import {assert} from 'chai'
 import {inspect} from 'util'
-import {applyMethod, cloneDeep} from '../dist/util'
+import {applyMethod, cloneDeep, isPlainObject} from '../dist/util'
 
 
 describe('util', () => {
@@ -65,6 +65,36 @@ describe('util', () => {
             assert.notEqual(orig, copy)
             assert.notInstanceOf(copy, Foo)
             assert.deepEqual({bar: 3}, copy)
+        })
+
+    })
+
+    describe('isPlainObject()', () => {
+
+        it('returns false for scalar values', () => {
+            assert.strictEqual(false, isPlainObject(undefined))
+            assert.strictEqual(false, isPlainObject(null))
+            assert.strictEqual(false, isPlainObject('foo'))
+            assert.strictEqual(false, isPlainObject(3))
+        })
+
+        it('returns false for arrays, functions and standard js objects', () => {
+            assert.strictEqual(false, isPlainObject([]))
+            assert.strictEqual(false, isPlainObject(() => {}))
+            assert.strictEqual(false, isPlainObject(new Date))
+            assert.strictEqual(false, isPlainObject(/foo/))
+        })
+
+        it('returns false for objects made with constructors', () => {
+            function Foo() {}
+            class Bar {}
+            assert.strictEqual(false, isPlainObject(new Foo))
+            assert.strictEqual(false, isPlainObject(new Bar))
+        })
+
+        it('returns true for plain objects', () => {
+            assert.strictEqual(true, isPlainObject({foo: 3}))
+            assert.strictEqual(true, isPlainObject(Object.create(null)))
         })
 
     })

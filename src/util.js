@@ -25,3 +25,10 @@ export function cloneDeep(val) {
         return val
     }
 }
+
+
+export function isPlainObject(obj) {
+    if (!(obj && typeof obj == 'object')) return false
+    let proto = Object.getPrototypeOf(obj)
+    return proto == null || proto === Object.prototype
+}
