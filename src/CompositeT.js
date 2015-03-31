@@ -1,3 +1,5 @@
+const {cloneDeep, applyMethod} = require('./util.js')
+
 const UnitT    = require('./UnitT.js'),
     UnitClassT = require('./UnitClassT.js'),
     UnitPredT  = require('./UnitPredT.js')
@@ -64,25 +66,10 @@ module.exports = class CompositeT {
     }
 
 
-    restore(val) { return this._restore(this._cloneStructure(val)) }
+    restore(val) { return this._restore(cloneDeep(val)) }
 
 
     restoreUnsafe(val) { return this._restore(val) }
-
-
-    _cloneStructure(val) {
-        if (val instanceof Array) {
-            return val.map((child) => this._cloneStructure(child))
-        } else if (val && typeof val == 'object') {
-            let copy = {}
-            for (let key in val) {
-                if (val.hasOwnProperty(key)) copy[key] = this._cloneStructure(val[key])
-            }
-            return copy
-        } else {
-            return val
-        }
-    }
 
 
     _restore(val) {
@@ -96,10 +83,10 @@ module.exports = class CompositeT {
                 let key = keys[0],
                     path = key.slice(this.options.prefix.length)
                 for (let i in this.unitTs) {
-                    let trans = this.unitTs[i]
-                    if (trans.path === path) {
+                    let unitT = this.unitTs[i]
+                    if (unitT.path === path) {
                         let restoredChildren = this._restore(val[key])
-                        return trans.restore(restoredChildren)
+                        return unitT.restore(restoredChildren)
                     }
                 }
             }
@@ -163,15 +150,15 @@ module.exports = class CompositeT {
 
     validateConsistency(unitTs) {
         for (let i in unitTs) {
-            let trans     = unitTs[i],
-                token     = trans.token,
-                ns        = trans.namespace,
+            let unitT     = unitTs[i],
+                token     = unitT.token,
+                ns        = unitT.namespace,
                 sameNs    = unitTs.filter((s) => s.namespace === ns),
                 sameToken = sameNs.filter((s) => s.token === token)
             if (sameToken.length > 1)  return `${sameToken.length} transformers for token ${token}`
-            if (trans instanceof UnitClassT) {
-                let sameClass = unitTs.filter((t) => t.class === trans.class)
-                if (sameClass.length > 1) return `${sameClass.length} transformers for class ${trans.class.name}`
+            if (unitT instanceof UnitClassT) {
+                let sameClass = unitTs.filter((t) => t.class === unitT.class)
+                if (sameClass.length > 1) return `${sameClass.length} transformers for class ${unitT.class.name}`
             }
         }
     }
