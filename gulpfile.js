@@ -21,4 +21,4 @@ gulp.task('watch', () =>
     gulp.watch(['src/**/*.js', 'tests/**/*.js'], ['build', 'test']))
 
 
-gulp.task('default', ['build'])
+gulp.task('default', ['build', 'test'])
