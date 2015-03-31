@@ -1,4 +1,4 @@
-const {cloneDeep, applyMethod} = require('./util.js')
+const {cloneDeep, applyMethod, isPlainObject} = require('./util.js')
 
 const UnitT    = require('./UnitT.js'),
     UnitClassT = require('./UnitClassT.js'),
@@ -24,8 +24,6 @@ module.exports = class CompositeT {
 
 
     _dump(val, mutate=false) {
-        let isObject = val && typeof val == 'object',
-            isPlain  = isObject && (!val.constructor || val.constructor === Object)
         for (let i in this.predTs) {
             let predT = this.predTs[i]
             if (predT.pred(val)) {
@@ -33,7 +31,7 @@ module.exports = class CompositeT {
                 return { [this.options.prefix + predT.path]: this._dump(dumped, true) }
             }
         }
-        if (isObject && !isPlain) {
+        if (val && val.constructor) {
             for (let i in this.classTs) {
                 if (val.constructor !== this.classTs[i].class) continue
                 let classT = this.classTs[i],
@@ -41,28 +39,14 @@ module.exports = class CompositeT {
                 return { [this.options.prefix + classT.path]: this._dump(dumped, true) }
             }
         }
-        if (val instanceof Array) {
-            if (mutate) {
-                for (let i in val) val[i] = this._dump(val[i])
-                return val
-            } else {
-                return val.map((child) => this._dump(child))
-            }
-        } else if (isPlain) {
-            if (mutate) {
-                for (let key in val) {
-                    if (val.hasOwnProperty(key)) val[key] = this._dump(val[key])
-                }
-                return val
-            } else {
-                let copy = {}
-                for (let key in val) {
-                    if (val.hasOwnProperty(key)) copy[key] = this._dump(val[key])
-                }
-                return copy
-            }
+        let isPlain = isPlainObject(val),
+            isArr = val instanceof Array
+        if (isPlain || isArr) {
+            let copy = mutate ? val : (isArr ? [] : {})
+            for (let i in val) copy[i] = this._dump(val[i])
+            return copy
         }
-        return val
+        else return val
     }
 
 
