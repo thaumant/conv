@@ -32,3 +32,16 @@ export function isPlainObject(obj) {
     let proto = Object.getPrototypeOf(obj)
     return proto == null || proto === Object.prototype
 }
+
+
+export function getPrototypeChain(Constructor) {
+    let result = []
+    if (typeof Constructor !== 'function' || !Constructor.prototype)
+        throw new Error('Prototype chain for invalid constructor')
+    let proto = Constructor.prototype
+    while(proto) {
+        result.push(proto)
+        proto = Object.getPrototypeOf(proto)
+    }
+    return result
+}

@@ -1,6 +1,6 @@
 import {assert} from 'chai'
 import {inspect} from 'util'
-import {applyMethod, cloneDeep, isPlainObject} from '../dist/util'
+import {applyMethod, cloneDeep, isPlainObject, getPrototypeChain} from '../dist/util'
 
 
 describe('util', () => {
@@ -95,6 +95,36 @@ describe('util', () => {
         it('returns true for plain objects', () => {
             assert.strictEqual(true, isPlainObject({foo: 3}))
             assert.strictEqual(true, isPlainObject(Object.create(null)))
+        })
+
+    })
+
+    describe('getPrototypeChain()', () => {
+
+        it('returns chain with a single proto for Object', () => {
+            let chain = getPrototypeChain(Object)
+            assert.lengthOf(chain, 1)
+            assert.strictEqual(Object.prototype, chain[0])
+        })
+
+        it('returns proper chains for standard constructors', () => {
+            let constructors = [Number, String, Date, RegExp, Function]
+            constructors.forEach((C) => {
+                let chain = getPrototypeChain(C)
+                assert.lengthOf(chain, 2)
+                assert.strictEqual(C.prototype, chain[0])
+                assert.strictEqual(Object.prototype, chain[1])
+            })
+        })
+
+        it('returns proper chains for sublasses', () => {
+            class Foo {}
+            class Bar extends Foo {}
+            let chain = getPrototypeChain(Bar)
+            assert.lengthOf(chain, 3)
+            assert.strictEqual(chain[0], Bar.prototype)
+            assert.strictEqual(chain[1], Foo.prototype)
+            assert.strictEqual(chain[2], Object.prototype)
         })
 
     })
