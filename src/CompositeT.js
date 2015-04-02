@@ -35,7 +35,7 @@ module.exports = class CompositeT {
         }
         if (val && val.constructor) {
             for (let i in this.classTs) {
-                if (val.constructor !== this.classTs[i].class) continue
+                if (!(val instanceof this.classTs[i].class)) continue
                 let classT = this.classTs[i],
                     dumped = classT.dump(val)
                 return { [this.options.prefix + classT.path]: this._dump(dumped, true) }

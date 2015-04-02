@@ -58,6 +58,20 @@ describe('CompositeT (transformation)', () => {
             assert.deepEqual({$Bar: null}, t.dump(new Foo))
         })
 
+        it('applies closes class transformer first', () => {
+            class Class1 {}
+            class Class2 {}
+            class Class3 {}
+            let t = new CompositeT([
+                {class: Class2, dump: () => null},
+                {class: Class1, dump: () => null},
+                {class: Class3, dump: () => null}
+            ])
+            assert.deepEqual({$Class3: null}, t.dump(new Class3))
+            assert.deepEqual({$Class2: null}, t.dump(new Class2))
+            assert.deepEqual({$Class1: null}, t.dump(new Class1))
+        })
+
     })
 
     describe('#_dump()', () => {
