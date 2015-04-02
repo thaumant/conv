@@ -32,7 +32,7 @@ module.exports = class UnitClassT extends UnitT {
 
         if (!maybeToken)                                         return 'missing token and no class name'
         if (s.token && !this.isValidName(s.token))               return `invalid token${forToken}`
-        if (s.namespace && !this.isValidNamespace(s.namespace))  return `invalid namespace${forToken}`
+        if (s.namespace && !this.isValidNS(s.namespace))         return `invalid namespace${forToken}`
         if (typeof s.class !== 'function')                       return `invalid class${forToken}`
         if (s.restore && (typeof s.restore !== 'function'))      return `invalid restore method${forToken}`
         switch (true) {

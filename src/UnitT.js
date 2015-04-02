@@ -14,7 +14,7 @@ module.exports = class UnitT {
         return typeof str === 'string' && /^[a-zA-Z\$_][a-zA-Z\$_\d]*$/i.test(str)
     }
 
-    isValidNamespace(str) {
+    isValidNS(str) {
         if (typeof str !== 'string') return false
         let parts = str.split('.')
         for (let i in parts) {

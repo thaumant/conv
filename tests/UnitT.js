@@ -50,9 +50,9 @@ describe('UnitT', () => {
 
     })
 
-    describe('#isValidNamespace', () => {
+    describe('#isValidNS', () => {
 
-        let val = UnitT.prototype.isValidNamespace.bind(UnitT.prototype)
+        let val = UnitT.prototype.isValidNS.bind(UnitT.prototype)
 
         it('returns false when given a non-string', () => {
             assert.strictEqual(false, val())
