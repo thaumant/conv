@@ -15,7 +15,6 @@ describe('UnitClassT', () => {
 
         it('calls UnitT#validateSpec() at first', () => {
             assert.strictEqual('spec is not a plain object', val([]))
-            assert.strictEqual('spec is missing class or predicate', val({}))
         })
 
         it('tells if token is given and it is not a valid string', () => {
@@ -112,11 +111,11 @@ describe('UnitClassT', () => {
             assert.strictEqual(42, t.dump(new Bar))
         })
 
-        it('stores spec.namespace as namespace property, or sets to null if falsy', () => {
+        it('stores spec.namespace as namespace property', () => {
             let t1 = new UnitClassT({class: Bar, namespace: 'foobar'}),
                 t2 = new UnitClassT({class: Bar})
             assert.strictEqual('foobar', t1.namespace)
-            assert.strictEqual(null, t2.namespace)
+            assert.strictEqual(undefined, t2.namespace)
         })
 
         it('sets path property as `namespace.token` or just `token`', () => {

@@ -1,4 +1,5 @@
-const UnitT = require('./UnitT')
+const UnitT = require('./UnitT'),
+    {isFunc, isStr} = require('./util')
 
 
 module.exports = class UnitPredT extends UnitT {
@@ -9,20 +10,26 @@ module.exports = class UnitPredT extends UnitT {
         this.pred      = spec.pred
         this.dump      = spec.dump
         this.restore   = spec.restore
-        this.namespace = spec.namespace || null
+        this.namespace = spec.namespace
         this.path      = (this.namespace ? this.namespace + '.' : '') + this.token
     }
 
     validateSpec(s) {
-        if (s instanceof UnitPredT)             return
+        if (s instanceof UnitPredT)           return
         let err = super.validateSpec(s)
-        if (err)                                return err
-        if (!s.token)                           return 'missing token'
-        if (!this.isValidName(s.token))         return 'invalid token'
-        if (s.namespace &&
-           !this.isValidNamespace(s.namespace)) return `invalid namespace for ${s.token}`
-        if (typeof s.pred !== 'function')       return `invalid predicate for ${s.token}`
-        if (typeof s.dump !== 'function')       return `missing dump method for ${s.token}`
-        if (typeof s.restore !== 'function')    return `missing restore method for ${s.token}`
+        if (err)                              return err
+        switch (true) {
+            case s.token == null:             return 'missing token'
+            case this.isValidName(s.token):   break
+            default:                          return 'invalid token'
+        }
+        switch (true) {
+            case s.namespace == null:         break
+            case this.isValidNS(s.namespace): break
+            default:                          return `invalid namespace for ${s.token}`
+        }
+        if (!isFunc(s.pred))    return `invalid predicate for ${s.token}`
+        if (!isFunc(s.dump))    return `missing dump method for ${s.token}`
+        if (!isFunc(s.restore)) return `missing restore method for ${s.token}`
     }
 }

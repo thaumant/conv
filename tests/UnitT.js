@@ -19,10 +19,6 @@ describe('UnitT', () => {
             assert.strictEqual('spec is not a plain object', val([]))
         })
 
-        it('tells if spec has neigher class nor predicate', () => {
-            assert.strictEqual('spec is missing class or predicate', val({}))
-        })
-
         it('passes otherwise', () => {
             assert.strictEqual(undefined, val({class: 3}))
         })

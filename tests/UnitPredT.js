@@ -15,7 +15,6 @@ describe('UnitPredT', () => {
 
         it('calls UnitT#validateSpec() at first', () => {
             assert.strictEqual('spec is not a plain object', val([]))
-            assert.strictEqual('spec is missing class or predicate', val({}))
         })
 
         it('tells if token is not a valid string', () => {
@@ -52,7 +51,7 @@ describe('UnitPredT', () => {
     describe('#constructor()', () => {
 
         let s1 = {token: 'Foo', pred: isFoo, dump: fooDump, restore: fooRest, namespace: 'foobar'},
-            s2 = {token: 'Foo', pred: isFoo, dump: fooDump, restore: fooRest, namespace: 0}
+            s2 = {token: 'Foo', pred: isFoo, dump: fooDump, restore: fooRest, namespace: null}
 
         let t1 = new UnitPredT(s1)
         let t2 = new UnitPredT(s2)
@@ -80,8 +79,7 @@ describe('UnitPredT', () => {
             assert.strictEqual(s1.restore, t1.restore)
         })
 
-        it('stores spec.namespace as namespace property, or sets to null if falsy', () => {
-            
+        it('stores spec.namespace as namespace property', () => {
             assert.strictEqual(t1.namespace, s1.namespace)
             assert.strictEqual(t2.namespace, null)
         })
