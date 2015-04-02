@@ -1,4 +1,4 @@
-const {cloneDeep, applyMethod, isPlainObject} = require('./util.js')
+const {cloneDeep, applyMethod, isPlainObject, isArr} = require('./util.js')
 
 const UnitT    = require('./UnitT.js'),
     UnitClassT = require('./UnitClassT.js'),
@@ -11,7 +11,7 @@ module.exports = class CompositeT {
             prefix:     options.prefix || '$',
             serializer: options.serializer || JSON
         }
-        if (!(specs instanceof Array)) throw new Error('Expected array of specs')
+        if (!isArr(specs)) throw new Error('Expected array of specs')
         this.unitTs  = specs.map(this.makeUnitT)
         this.predTs  = this.unitTs.filter((t) => t instanceof UnitPredT)
         this.classTs = this.unitTs
@@ -84,7 +84,7 @@ module.exports = class CompositeT {
 
 
     extendWith(specs, options) {
-        if (!(specs instanceof Array)) return this.extendWith([specs], options)
+        if (!isArr(specs)) return this.extendWith([specs], options)
         let result = []
         this.unitTs.concat(specs).forEach((spec) => {
             if (spec instanceof CompositeT) {
@@ -98,7 +98,7 @@ module.exports = class CompositeT {
 
 
     overrideBy(specs, options) {
-        if (!(specs instanceof Array)) return this.overrideBy([specs], options)
+        if (!isArr(specs)) return this.overrideBy([specs], options)
         let result = []
         this.unitTs.concat(specs).reverse().forEach((spec) => {
             if (spec instanceof CompositeT) {

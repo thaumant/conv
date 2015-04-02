@@ -33,6 +33,15 @@ function isPlainObject(obj) {
 }
 
 
+function isFunc(val) { return typeof val === 'function' }
+
+function isStr(val) { return typeof val === 'string' }
+
+function isNum(val) { return typeof val === 'number' }
+
+function isArr(val) { return val instanceof Array }
+
+
 function getProtoChain(val, inclusive=false) {
     let result = inclusive ? [val] : []
     if (!(val && typeof val === 'object')) return result
@@ -49,3 +58,7 @@ exports.applyMethod = applyMethod
 exports.cloneDeep = cloneDeep
 exports.isPlainObject = isPlainObject
 exports.getProtoChain = getProtoChain
+exports.isFunc = isFunc
+exports.isStr = isStr
+exports.isNum = isNum
+exports.isArr = isArr
