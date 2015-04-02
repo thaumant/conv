@@ -1,6 +1,5 @@
 
-
-export function applyMethod(obj, method, args) {
+function applyMethod(obj, method, args) {
     if (args == null) return obj[method]()
     switch (args.length) {
         case 0:  return obj[method]()
@@ -12,7 +11,7 @@ export function applyMethod(obj, method, args) {
 }
 
 
-export function cloneDeep(val) {
+function cloneDeep(val) {
     if (val instanceof Array) {
         return val.map((child) => cloneDeep(child))
     } else if (val && typeof val == 'object') {
@@ -27,14 +26,14 @@ export function cloneDeep(val) {
 }
 
 
-export function isPlainObject(obj) {
+function isPlainObject(obj) {
     if (!(obj && typeof obj == 'object')) return false
     let proto = Object.getPrototypeOf(obj)
     return proto == null || proto === Object.prototype
 }
 
 
-export function getPrototypeChain(Constructor) {
+function getPrototypeChain(Constructor) {
     let result = []
     if (typeof Constructor !== 'function' || !Constructor.prototype)
         throw new Error('Prototype chain for invalid constructor')
@@ -45,3 +44,9 @@ export function getPrototypeChain(Constructor) {
     }
     return result
 }
+
+
+exports.applyMethod = applyMethod
+exports.cloneDeep = cloneDeep
+exports.isPlainObject = isPlainObject
+exports.getPrototypeChain = getPrototypeChain
