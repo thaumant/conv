@@ -1,5 +1,5 @@
 const UnitT = require('./UnitT'),
-    {getPrototypeChain} = require('./util')
+    {getProtoChain} = require('./util')
 
 
 module.exports = class UnitClassT extends UnitT {
@@ -12,7 +12,7 @@ module.exports = class UnitClassT extends UnitT {
         this.restore    = spec.restore   || (dumped) => new spec.class(dumped)
         this.namespace  = spec.namespace || null
         this.path       = (this.namespace ? this.namespace + '.' : '') + this.token
-        this.protoChain = getPrototypeChain(this.class)
+        this.protoChain = getProtoChain(this.class.prototype, true)
 
         let dump  = spec.dump
         switch (true) {

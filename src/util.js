@@ -33,12 +33,11 @@ function isPlainObject(obj) {
 }
 
 
-function getPrototypeChain(Constructor) {
-    let result = []
-    if (typeof Constructor !== 'function' || !Constructor.prototype)
-        throw new Error('Prototype chain for invalid constructor')
-    let proto = Constructor.prototype
-    while(proto) {
+function getProtoChain(val, inclusive=false) {
+    let result = inclusive ? [val] : []
+    if (!(val && typeof val === 'object')) return result
+    let proto = Object.getPrototypeOf(val)
+    while(proto != null) {
         result.push(proto)
         proto = Object.getPrototypeOf(proto)
     }
@@ -49,4 +48,4 @@ function getPrototypeChain(Constructor) {
 exports.applyMethod = applyMethod
 exports.cloneDeep = cloneDeep
 exports.isPlainObject = isPlainObject
-exports.getPrototypeChain = getPrototypeChain
+exports.getProtoChain = getProtoChain

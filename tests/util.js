@@ -1,6 +1,6 @@
 import {assert} from 'chai'
 import {inspect} from 'util'
-import {applyMethod, cloneDeep, isPlainObject, getPrototypeChain} from '../dist/util'
+import {applyMethod, cloneDeep, isPlainObject, getProtoChain} from '../dist/util'
 
 
 describe('util', () => {
@@ -99,32 +99,53 @@ describe('util', () => {
 
     })
 
-    describe('getPrototypeChain()', () => {
+    describe('getProtoChain()', () => {
 
-        it('returns chain with a single proto for Object', () => {
-            let chain = getPrototypeChain(Object)
+        let get = getProtoChain
+
+        it('returns chain with a single proto for plain object', () => {
+            let chain = get({})
             assert.lengthOf(chain, 1)
             assert.strictEqual(Object.prototype, chain[0])
         })
 
-        it('returns proper chains for standard constructors', () => {
-            let constructors = [Number, String, Date, RegExp, Function]
-            constructors.forEach((C) => {
-                let chain = getPrototypeChain(C)
+        it('returns empty chains for scalars and functions', () => {
+            assert.lengthOf(get(undefined),   0)
+            assert.lengthOf(get(null),        0)
+            assert.lengthOf(get(3),           0)
+            assert.lengthOf(get('foo'),       0)
+            assert.lengthOf(get(() => {}),    0)
+        })
+
+        it('returns proper chains for dates and regexes', () => {
+            ([/foo/, new Date]).forEach((val) => {
+                let chain = get(val)
                 assert.lengthOf(chain, 2)
-                assert.strictEqual(C.prototype, chain[0])
-                assert.strictEqual(Object.prototype, chain[1])
+                assert.strictEqual(chain[0], val.constructor.prototype)
+                assert.strictEqual(chain[1], Object.prototype)
             })
         })
 
-        it('returns proper chains for sublasses', () => {
+        it('returns proper chains for sublasses instances', () => {
             class Foo {}
             class Bar extends Foo {}
-            let chain = getPrototypeChain(Bar)
+            let chain = get(new Bar)
             assert.lengthOf(chain, 3)
             assert.strictEqual(chain[0], Bar.prototype)
             assert.strictEqual(chain[1], Foo.prototype)
             assert.strictEqual(chain[2], Object.prototype)
+        })
+
+        it('includes value itself when inclusive arg is true', () => {
+            let date = new Date,
+                nullChain = get(null, true),
+                dateChain = get(date, true)
+            assert.lengthOf(nullChain, 1)
+            assert.lengthOf(dateChain, 3)
+            assert.strictEqual(null, nullChain[0])
+            assert.strictEqual(date, dateChain[0])
+            assert.strictEqual(Date.prototype,   dateChain[1])
+            assert.strictEqual(Object.prototype, dateChain[2])
         })
 
     })
