@@ -13,8 +13,10 @@ module.exports = class CompositeT {
         }
         if (!(specs instanceof Array)) throw new Error('Expected array of specs')
         this.unitTs  = specs.map(this.makeUnitT)
-        this.predTs  = this.unitTs.filter((s) => s instanceof UnitPredT)
-        this.classTs = this.unitTs.filter((s) => s instanceof UnitClassT)
+        this.predTs  = this.unitTs.filter((t) => t instanceof UnitPredT)
+        this.classTs = this.unitTs
+            .filter((t) => t instanceof UnitClassT)
+            .sort((t1, t2) => t2.protoChain.length - t1.protoChain.length)
         let err = this.validateConsistency(this.unitTs)
         if (err) throw new Error(`Inconsistent transformers: ${err}`)
     }

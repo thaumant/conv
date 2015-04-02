@@ -1,4 +1,5 @@
-const UnitT = require('./UnitT')
+const UnitT = require('./UnitT'),
+    {getPrototypeChain} = require('./util')
 
 
 module.exports = class UnitClassT extends UnitT {
@@ -6,11 +7,12 @@ module.exports = class UnitClassT extends UnitT {
         let err = this.validateSpec(spec)
         if (err) throw new Error(`Failed to create class transformer: ${err}`)
 
-        this.class     = spec.class
-        this.token     = spec.token     || spec.class.name
-        this.restore   = spec.restore   || (dumped) => new spec.class(dumped)
-        this.namespace = spec.namespace || null
-        this.path      = (this.namespace ? this.namespace + '.' : '') + this.token
+        this.class      = spec.class
+        this.token      = spec.token     || spec.class.name
+        this.restore    = spec.restore   || (dumped) => new spec.class(dumped)
+        this.namespace  = spec.namespace || null
+        this.path       = (this.namespace ? this.namespace + '.' : '') + this.token
+        this.protoChain = getPrototypeChain(this.class)
 
         let dump  = spec.dump
         switch (true) {

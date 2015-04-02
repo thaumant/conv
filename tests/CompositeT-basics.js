@@ -100,6 +100,21 @@ describe('CompositeT (basics)', () => {
             assert.instanceOf(t.unitTs[1], UnitPredT)
         })
 
+        it('sorts class transformers by the length of the prototype chain', () => {
+            class Class1 {}
+            class Class2 extends Class1 {}
+            class Class3 extends Class2 {}
+            let t = new CompositeT([
+                    {class: Class2, dump: () => null},
+                    {class: Class3, dump: () => null},
+                    {class: Class1, dump: () => null}
+                ])
+            assert.lengthOf(t.classTs, 3)
+            assert.strictEqual(t.classTs[0].class, Class3)
+            assert.strictEqual(t.classTs[1].class, Class2)
+            assert.strictEqual(t.classTs[2].class, Class1)
+        })
+
     })
 
 })
