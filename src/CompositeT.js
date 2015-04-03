@@ -26,29 +26,35 @@ module.exports = class CompositeT {
 
 
     _dump(val, mutate=false) {
-        for (let i in this.predTs) {
+        for (let i = 0; i < this.predTs.length; i++) {
             let predT = this.predTs[i]
             if (predT.pred(val)) {
                 let dumped = predT.dump(val)
                 return { [this.options.prefix + predT.path]: this._dump(dumped, true) }
             }
         }
-        if (val && val.constructor) {
-            for (let i in this.classTs) {
-                if (!(val instanceof this.classTs[i].class)) continue
-                let classT = this.classTs[i],
-                    dumped = classT.dump(val)
-                return { [this.options.prefix + classT.path]: this._dump(dumped, true) }
-            }
+        if (!val || typeof val !== 'object') {
+            return val
         }
-        let isPlain = isPlainObject(val),
-            isArr = val instanceof Array
-        if (isPlain || isArr) {
-            let copy = mutate ? val : (isArr ? [] : {})
-            for (let i in val) copy[i] = this._dump(val[i])
+        for (let i = 0; i < this.classTs.length; i++) {
+            if (!(val instanceof this.classTs[i].class)) continue
+            let classT = this.classTs[i],
+                dumped = classT.dump(val)
+            return { [this.options.prefix + classT.path]: this._dump(dumped, true) }
+        }
+        if (val.constructor === Array) {
+            let copy = mutate ? val : []
+            for (let i = 0; i < val.length; i++) copy[i] = this._dump(val[i])
             return copy
         }
-        else return val
+        if (isPlainObject(val)) {
+            let copy = mutate ? val : {}
+            for (let key in val) {
+                if (val.hasOwnProperty(key)) copy[key] = this._dump(val[key])
+            }
+            return copy
+        }
+        return val
     }
 
 
@@ -59,26 +65,26 @@ module.exports = class CompositeT {
 
 
     _restore(val) {
-        if (val instanceof Array) {
-            for (let i in val) val[i] = this._restore(val[i])
+        if (!val || typeof val !== 'object') {
             return val
         }
-        if (val instanceof Object) {
-            let keys = Object.keys(val)
-            if (keys.length === 1 && keys[0].startsWith(this.options.prefix)) {
-                let key = keys[0],
-                    path = key.slice(this.options.prefix.length)
-                for (let i in this.unitTs) {
-                    let unitT = this.unitTs[i]
-                    if (unitT.path === path) {
-                        let restoredChildren = this._restore(val[key])
-                        return unitT.restore(restoredChildren)
-                    }
+        if (val.constructor === Array) {
+            for (let i = 0; i < val.length; i++) val[i] = this._restore(val[i])
+            return val
+        }
+        let keys = Object.keys(val)
+        if (keys.length === 1 && keys[0].startsWith(this.options.prefix)) {
+            let key = keys[0],
+                path = key.slice(this.options.prefix.length)
+            for (let i = 0; i < this.unitTs.length; i++) {
+                let unitT = this.unitTs[i]
+                if (unitT.path === path) {
+                    let restoredChildren = this._restore(val[key])
+                    return unitT.restore(restoredChildren)
                 }
             }
-            for (let i in val) val[i] = this._restore(val[i])
-            return val
         }
+        for (let i in val) val[i] = this._restore(val[i])
         return val
     }
 
