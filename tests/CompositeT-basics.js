@@ -25,7 +25,7 @@ describe('CompositeT (basics)', () => {
         })
 
         it('throws an error if cannot determine which transformer to create', () => {
-            assert.throws(() => make({}), 'Invalid spec, no class or predicate')
+            assert.throws(() => make({}), 'Invalid spec, no class, prototype or predicate')
         })
 
     })
@@ -47,6 +47,14 @@ describe('CompositeT (basics)', () => {
                 spec2 = {token: 'Bar', class: Foo, dump: fooDump},
                 ts = [spec1, spec2].map(make)
             assert.strictEqual('2 transformers for class Foo', val(ts))
+        })
+
+        it('tells if some proto occurs more than one time', () => {
+            let proto = {},
+                spec1 = {token: 'Foo', proto: proto},
+                spec2 = {token: 'Bar', proto: proto},
+                ts = [spec1, spec2].map(make)
+            assert.strictEqual('2 transformers for proto Foo', val(ts))
         })
 
         it('passes valid array of transformers', () => {

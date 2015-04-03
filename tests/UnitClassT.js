@@ -23,6 +23,12 @@ describe('UnitClassT', () => {
             assert.strictEqual('invalid token for Foo', val({class: Foo, token: '$%^'}))
         })
 
+        it('tells if namespace is given and it is not a valid non-empty string', () => {
+            assert.strictEqual('invalid namespace for Bar', val({class: Bar, namespace: 2}))
+            assert.strictEqual('invalid namespace for Bar', val({class: Bar, namespace: {}}))
+            assert.strictEqual('invalid namespace for Bar', val({class: Bar, namespace: '$%^'}))
+        })
+
         it('tells when no token given and constructor has no name', () => {
             assert.strictEqual('missing token and no class name', val({class: () => null, dump: fooDump}))
         })
@@ -48,18 +54,12 @@ describe('UnitClassT', () => {
             assert.strictEqual(undefined, val({class: Bar, restore: barRest}))
         })
 
-        it('passes if falsy restore method or token given', () => {
+        it('passes if null/undefined restore method or token given', () => {
             assert.strictEqual(undefined, val({class: Bar, dump: barDump}))
         })
 
         it('needs only class param if class has #toJSON() method', () => {
             assert.strictEqual(undefined, val({class: Bar}))
-        })
-
-        it('tells if namespace is given and it is not a non-empty string', () => {
-            assert.strictEqual('invalid namespace for Bar', val({class: Bar, namespace: 2}))
-            assert.strictEqual('invalid namespace for Bar', val({class: Bar, namespace: {}}))
-            assert.strictEqual('invalid namespace for Bar', val({class: Bar, namespace: '$%^'}))
         })
 
     })
@@ -118,7 +118,7 @@ describe('UnitClassT', () => {
             assert.strictEqual(undefined, t2.namespace)
         })
 
-        it('sets path property as `namespace.token` or just `token`', () => {
+        it('sets path property as `namespace.token` or just `token` if no namespace', () => {
             let t1 = new UnitClassT({class: Bar, namespace: 'foobar'}),
                 t2 = new UnitClassT({class: Bar})
             assert.strictEqual(t1.path, 'foobar.Bar')

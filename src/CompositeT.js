@@ -2,6 +2,7 @@ const {cloneDeep, applyMethod, isPlainObject, isArr} = require('./util.js')
 
 const UnitT    = require('./UnitT.js'),
     UnitClassT = require('./UnitClassT.js'),
+    UnitProtoT = require('./UnitProtoT.js'),
     UnitPredT  = require('./UnitPredT.js')
 
 
@@ -16,6 +17,9 @@ module.exports = class CompositeT {
         this.predTs  = this.unitTs.filter((t) => t instanceof UnitPredT)
         this.classTs = this.unitTs
             .filter((t) => t instanceof UnitClassT)
+            .sort((t1, t2) => t2.protoChain.length - t1.protoChain.length)
+        this.protoTs = this.unitTs
+            .filter((t) => t instanceof UnitProtoT)
             .sort((t1, t2) => t2.protoChain.length - t1.protoChain.length)
         let err = this.validateConsistency(this.unitTs)
         if (err) throw new Error(`Inconsistent transformers: ${err}`)
@@ -41,6 +45,12 @@ module.exports = class CompositeT {
             let classT = this.classTs[i],
                 dumped = classT.dump(val)
             return { [this.options.prefix + classT.path]: this._dump(dumped, true) }
+        }
+        for (let i = 0; i < this.protoTs.length; i++) {
+            let protoT = this.protoTs[i]
+            if (!protoT.proto.isPrototypeOf(val)) continue
+            let dumped = protoT.dump(val)
+            return { [this.options.prefix + protoT.path]: this._dump(dumped, true) }
         }
         if (val.constructor === Array) {
             let copy = mutate ? val : []
@@ -134,8 +144,9 @@ module.exports = class CompositeT {
         switch (true) {
             case spec instanceof UnitT: return spec
             case spec && !!spec.class:  return new UnitClassT(spec)
+            case spec && !!spec.proto:  return new UnitProtoT(spec)
             case spec && !!spec.pred:   return new UnitPredT(spec)
-            default: throw new Error('Invalid spec, no class or predicate')
+            default: throw new Error('Invalid spec, no class, prototype or predicate')
         }
     }
 
@@ -151,6 +162,10 @@ module.exports = class CompositeT {
             if (unitT instanceof UnitClassT) {
                 let sameClass = unitTs.filter((t) => t.class === unitT.class)
                 if (sameClass.length > 1) return `${sameClass.length} transformers for class ${unitT.class.name}`
+            }
+            if(unitT instanceof UnitProtoT) {
+                let sameProto = unitTs.filter((t) => t.proto === unitT.proto)
+                if (sameProto.length > 1) return `${sameProto.length} transformers for proto ${unitT.token}`
             }
         }
     }

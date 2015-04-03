@@ -26,11 +26,19 @@ describe('CompositeT (transformation)', () => {
             assert.deepEqual(t.dump(obj), obj)
         })
 
-        it('converts instance if spec class matches', () => {
+        it('converts value if class matches', () => {
             assert.deepEqual(t.dump(foo), {$Foo: null})
         })
 
-        it('converts value if spec predicate matches', () => {
+        it('converts value if proto matches', () => {
+            let proto = {bar: 3},
+                val = Object.create(proto),
+                t = new CompositeT([{token: 'X', proto: proto}])
+            val.baz = 14
+            assert.deepEqual(t.dump(val), {$X: {baz: 14}})
+        })
+
+        it('converts value if predicate matches', () => {
             assert.deepEqual(t.dump(foo), {$Foo: null})
         })
 
