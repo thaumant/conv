@@ -109,4 +109,29 @@ describe('UnitProtoT', () => {
 
     })
 
+    describe('#_defaultDump()', () => {
+
+        let _d = UnitProtoT.prototype._defaultDump
+
+        it('returns new plain object with all own properties of the source', () => {
+            let proto = {foo: 3},
+                val = Object.create(proto)
+            val.bar = 14
+            assert.deepEqual(_d(val), {bar: 14})
+        })
+
+    })
+
+    describe('#_defaultRestore()', () => {
+
+        it('returns new object with all source properties and transformer proto', () => {
+            let proto = {foo: 3},
+                t = new UnitProtoT({token: 'Foo', proto: proto}),
+                restored = t.restore({bar: 14})
+            assert.deepEqual(restored, {foo: 3, bar: 14})
+            assert(proto.isPrototypeOf(restored))
+        })
+
+    })
+
 })

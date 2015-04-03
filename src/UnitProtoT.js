@@ -71,5 +71,6 @@ module.exports = class UnitProtoT extends UnitT {
     _defaultRestore(dumped) {
         let result = Object.create(this.proto)
         for (let key in dumped) result[key] = dumped[key]
+        return result
     }
 }
