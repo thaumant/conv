@@ -1,14 +1,15 @@
 let gulp  = require('gulp'),
     babel = require('gulp-babel'),
     mocha = require('gulp-mocha'),
-    smaps = require('gulp-sourcemaps')
+    del   = require('del')
+
+
+gulp.task('clean', (cb) => { del('dist', cb) })
 
 
 gulp.task('build', () =>
     gulp.src('src/**/*.js')
-        .pipe(smaps.init())
         .pipe(babel())
-        .pipe(smaps.write("."))
         .pipe(gulp.dest('dist')))
 
 
@@ -21,4 +22,4 @@ gulp.task('watch', () =>
     gulp.watch(['src/**/*.js', 'tests/**/*.js'], ['build', 'test']))
 
 
-gulp.task('default', ['build', 'test'])
+gulp.task('default', ['clean', 'build'])
