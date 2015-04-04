@@ -191,4 +191,33 @@ describe('CompositeT (transformation)', () => {
 
     })
 
+    describe('#serialize()', () => {
+
+        let t = new CompositeT([{class: Foo, dump: fooDump}])
+
+        it('passes all arguments to serializer#serialize() method', () => {
+            assert.strictEqual('{\n    "foo": 3\n}', t.serialize({foo: 3}, null, 4))
+        })
+
+        it('dumps given value before serialization', () => {
+            assert.strictEqual('{"$Foo":null}', t.serialize(foo))
+        })
+
+    })
+
+    describe('#parse()', () => {
+
+        let t = new CompositeT([{class: Foo, dump: fooDump}])
+
+        it('calls serializer#parse() to parse provided string', () => {
+            assert.deepEqual({foo: 3}, t.parse('{"foo":3}'))
+        })
+
+        it('restores parsed JSON', () => {
+            let parsed = t.parse('{"$Foo": null}')
+            assert.instanceOf(parsed, Foo)
+        })
+
+    })
+
 })

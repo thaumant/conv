@@ -32,6 +32,24 @@ module.exports = class CompositeT {
     }
 
 
+    serialize(/* varargs */) {
+        let s = this.options.serializer
+        arguments[0] = this.dump(arguments[0])
+        return arguments.length === 1
+            ? s.serialize(arguments[0])
+            : s.serialize.apply(s, arguments)
+    }
+
+
+    parse(/* varargs */) {
+        let s = this.options.serializer,
+            parsed = arguments.length === 1
+                ? s.parse(arguments[0])
+                : s.parse.apply(s, arguments)
+        return this.restoreUnsafe(parsed)
+    }
+
+
     dump(val) { return this._dump(val) }
 
 

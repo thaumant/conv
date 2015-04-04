@@ -56,6 +56,20 @@ module.exports = (function () {
     }
 
     _createClass(CompositeT, {
+        serialize: {
+            value: function serialize() {
+                var s = this.options.serializer;
+                arguments[0] = this.dump(arguments[0]);
+                return arguments.length === 1 ? s.serialize(arguments[0]) : s.serialize.apply(s, arguments);
+            }
+        },
+        parse: {
+            value: function parse() {
+                var s = this.options.serializer,
+                    parsed = arguments.length === 1 ? s.parse(arguments[0]) : s.parse.apply(s, arguments);
+                return this.restoreUnsafe(parsed);
+            }
+        },
         dump: {
             value: function dump(val) {
                 return this._dump(val);
@@ -271,3 +285,4 @@ module.exports = (function () {
 
     return CompositeT;
 })();
+/* varargs */ /* varargs */
