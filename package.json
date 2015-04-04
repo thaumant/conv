@@ -1,7 +1,7 @@
 {
   "name": "shaped",
   "version": "0.1.0",
-  "description": "JSON extended",
+  "description": "Represent JS datatypes as JSON values, serialize to and restore from any format",
   "main": "dist/shaped.js",
   "scripts": {
     "build": "babel-node `which gulp`",
@@ -15,9 +15,10 @@
   },
   "keywords": [
     "json",
-    "extended",
-    "extension",
-    "ejson"
+    "ejson",
+    "serialize",
+    "serializer",
+    "parse"
   ],
   "author": "Elia Schelokov <thaumant@gmail.com>",
   "license": "MIT",
