@@ -57,7 +57,7 @@ if (typeof Set === "function") {
 
 var stdT = new CompositeT(specs);
 
-stdT.jx = stdT;
+stdT.shaped = stdT;
 stdT.CompositeT = CompositeT;
 
 module.exports = stdT;

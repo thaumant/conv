@@ -50,7 +50,7 @@ if (typeof Set === 'function') {
 const stdT = new CompositeT(specs)
 
 
-stdT.jx = stdT
+stdT.shaped = stdT
 stdT.CompositeT = CompositeT
 
 
