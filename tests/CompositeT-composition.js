@@ -116,7 +116,7 @@ describe('CompositeT (composition)', () => {
         })
 
         it('does not change options when given empty object or non-object', () => {
-            let serializer = {parse: () => null, stringify: () => null},
+            let serializer = {parse: () => null, serialize: () => null},
                 prefix = '?',
                 orig = new CompositeT([{class: Bar}], {serializer: serializer, prefix: prefix}),
                 copy1 = orig.withOptions({}),
@@ -133,7 +133,7 @@ describe('CompositeT (composition)', () => {
         it('make a copy of transformer with new prefix or serializer', () => {
             let orig = new CompositeT([{class: Bar}]),
                 newPrefix = '?',
-                newSerializer = {parse: () => null, stringify: () => null},
+                newSerializer = {parse: () => null, serialize: () => null},
                 copy1 = orig.withOptions({prefix: newPrefix}),
                 copy2 = orig.withOptions({serializer: newSerializer})
             assert.strictEqual(newPrefix, copy1.options.prefix)

@@ -1,4 +1,4 @@
-const {cloneDeep, applyMethod, isPlainObject, isArr} = require('./util.js')
+const {cloneDeep, applyMethod, isPlainObject, isArr, isFunc, isObj} = require('./util.js')
 
 const UnitT    = require('./UnitT.js'),
     UnitClassT = require('./UnitClassT.js'),
@@ -7,11 +7,16 @@ const UnitT    = require('./UnitT.js'),
 
 
 module.exports = class CompositeT {
-    constructor(specs, options={}) {
+    constructor(specs, opts={}) {
+        let err
+
         this.options = {
-            prefix:     options.prefix || '$',
-            serializer: options.serializer || JSON
+            prefix:     opts.prefix || '$',
+            serializer: opts && opts.serializer || this._defaultSerializer()
         }
+        err = this.validateSerializer(this.options.serializer)
+        if (err) throw new Error(`Invalid serializer: ${err}`)
+
         if (!isArr(specs)) throw new Error('Expected array of specs')
         this.unitTs  = specs.map(this.makeUnitT)
         this.predTs  = this.unitTs.filter((t) => t instanceof UnitPredT)
@@ -21,7 +26,8 @@ module.exports = class CompositeT {
         this.protoTs = this.unitTs
             .filter((t) => t instanceof UnitProtoT)
             .sort((t1, t2) => t2.protoChain.length - t1.protoChain.length)
-        let err = this.validateConsistency(this.unitTs)
+
+        err = this.validateConsistency(this.unitTs)
         if (err) throw new Error(`Inconsistent transformers: ${err}`)
     }
 
@@ -167,6 +173,24 @@ module.exports = class CompositeT {
                 let sameProto = unitTs.filter((t) => t.proto === unitT.proto)
                 if (sameProto.length > 1) return `${sameProto.length} transformers for proto ${unitT.token}`
             }
+        }
+    }
+
+
+    validateSerializer(s) {
+        switch (false) {
+            case isObj(s):            return 'not an object'
+            case isFunc(s.serialize): return 'serialize method is not a function'
+            case isFunc(s.parse):     return 'parse method is not a function'
+            default:                  return undefined
+        }
+    }
+
+
+    _defaultSerializer() {
+        return {
+            serialize: JSON.stringify,
+            parse:     JSON.parse
         }
     }
 }

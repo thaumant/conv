@@ -72,12 +72,64 @@ describe('CompositeT (basics)', () => {
 
     })
 
+    describe('#validateSerializer()', () => {
+
+        let val = CompositeT.prototype.validateSerializer,
+            ser = () => null,
+            par = () => null
+
+        it('tells if serializer is not an object', () => {
+            assert.strictEqual('not an object', val(null))
+            assert.strictEqual('not an object', val(3))
+            assert.strictEqual('not an object', val('foo'))
+        })
+
+        it('tells if serialize method is missing or invalid', () => {
+            assert.strictEqual('serialize method is not a function', val({parse: par}))
+            assert.strictEqual('serialize method is not a function', val({parse: par, serialize: 'foo'}))
+        })
+
+        it('tells if parse method is missing or invalid', () => {
+            assert.strictEqual('parse method is not a function', val({serialize: ser}))
+            assert.strictEqual('parse method is not a function', val({serialize: ser, parse: 'foo'}))
+        })
+
+    })
+
+    describe('#_defaultSerializer()', () => {
+
+        let val = CompositeT.prototype.validateSerializer,
+            def = CompositeT.prototype._defaultSerializer()
+
+        it('contains JSON #stringify() and #parse() as #serialize() and #parse()', () => {
+            assert.strictEqual(JSON.stringify, def.serialize)
+            assert.strictEqual(JSON.parse, def.parse)
+        })
+
+        it('passes #validateSerializer() check', () => {
+            assert.strictEqual(undefined, val(def))
+        })
+
+    })
+
     describe('#constructor()', () => {
 
         it('stores prefix and serializer options if provided', () => {
-            let t = new CompositeT([], {prefix: 'foo', serializer: isFoo})
-            assert.strictEqual('foo', t.options.prefix)
-            assert.strictEqual(isFoo, t.options.serializer)
+            let s = {serialize: () => null, parse: () => null},
+                t = new CompositeT([], {prefix: 'foo', serializer: s})
+            assert.strictEqual(t.options.prefix, 'foo')
+            assert.strictEqual(t.options.serializer, s)
+        })
+
+        it('assigns default JSON serializer when not given', () => {
+            let t = new CompositeT([])
+            assert.strictEqual(JSON.stringify, t.options.serializer.serialize)
+            assert.strictEqual(JSON.parse,     t.options.serializer.parse)
+        })
+
+        it('validates given serializer using #validateSerializer()', () => {
+            let test = () => new CompositeT([], {serializer: 'foo'})
+            assert.throw(test, 'Invalid serializer: not an object')
         })
 
         it('throws an error if specs is not an array', () => {

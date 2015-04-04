@@ -14,7 +14,7 @@ function applyMethod(obj, method, args) {
 function cloneDeep(val) {
     if (val instanceof Array) {
         return val.map((child) => cloneDeep(child))
-    } else if (val && typeof val == 'object') {
+    } else if (val && typeof val === 'object') {
         let copy = {}
         for (let key in val) {
             if (val.hasOwnProperty(key)) copy[key] = cloneDeep(val[key])
@@ -27,7 +27,7 @@ function cloneDeep(val) {
 
 
 function isPlainObject(obj) {
-    if (!(obj && typeof obj == 'object')) return false
+    if (!(obj && typeof obj === 'object')) return false
     let proto = Object.getPrototypeOf(obj)
     return proto == null || proto === Object.prototype
 }
@@ -38,6 +38,12 @@ function isFunc(val) { return typeof val === 'function' }
 function isStr(val) { return typeof val === 'string' }
 
 function isNum(val) { return typeof val === 'number' }
+
+function isObj(val) {
+    if (!val) return false
+    let t = typeof val
+    return t === 'object' || t === 'function'    
+}
 
 function isArr(val) { return val instanceof Array }
 
@@ -62,3 +68,4 @@ exports.isFunc = isFunc
 exports.isStr = isStr
 exports.isNum = isNum
 exports.isArr = isArr
+exports.isObj = isObj

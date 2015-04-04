@@ -22,7 +22,7 @@ function cloneDeep(val) {
         return val.map(function (child) {
             return cloneDeep(child);
         });
-    } else if (val && typeof val == "object") {
+    } else if (val && typeof val === "object") {
         var copy = {};
         for (var key in val) {
             if (val.hasOwnProperty(key)) copy[key] = cloneDeep(val[key]);
@@ -34,7 +34,7 @@ function cloneDeep(val) {
 }
 
 function isPlainObject(obj) {
-    if (!(obj && typeof obj == "object")) {
+    if (!(obj && typeof obj === "object")) {
         return false;
     }var proto = Object.getPrototypeOf(obj);
     return proto == null || proto === Object.prototype;
@@ -50,6 +50,13 @@ function isStr(val) {
 
 function isNum(val) {
     return typeof val === "number";
+}
+
+function isObj(val) {
+    if (!val) {
+        return false;
+    }var t = typeof val;
+    return t === "object" || t === "function";
 }
 
 function isArr(val) {
@@ -78,3 +85,4 @@ exports.isFunc = isFunc;
 exports.isStr = isStr;
 exports.isNum = isNum;
 exports.isArr = isArr;
+exports.isObj = isObj;
