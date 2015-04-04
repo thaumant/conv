@@ -1,28 +1,9 @@
 import {assert} from 'chai'
 import {inspect} from 'util'
-import {applyMethod, cloneDeep, isPlainObject, getProtoChain} from '../dist/util'
+import {cloneDeep, isPlainObject, getProtoChain} from '../dist/util'
 
 
 describe('util', () => {
-
-    describe('applyMethod()', () => {
-
-        let obj = {
-            foo: 3,
-            test: function (...args) { return [this.foo].concat(args) }
-        }
-
-        it('applies a method of an object with given arguments', () => {
-            assert.deepEqual([3],                   applyMethod(obj, 'test', []))
-            assert.deepEqual([3, 14, 15],           applyMethod(obj, 'test', [14, 15]))
-            assert.deepEqual([3, 14, 15, 92, 6, 5], applyMethod(obj, 'test', [14, 15, 92, 6, 5]))
-        })
-
-        it('calls a method without arguments when no args provided', () => {
-            assert.deepEqual([3], applyMethod(obj, 'test'))
-        })
-
-    })
 
     describe('cloneDeep()', () => {
 

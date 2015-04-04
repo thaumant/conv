@@ -1,4 +1,4 @@
-const {cloneDeep, applyMethod, isPlainObject, isArr, isFunc, isObj} = require('./util.js')
+const {cloneDeep, isPlainObject, isArr, isFunc, isObj} = require('./util.js')
 
 const UnitT    = require('./UnitT.js'),
     UnitClassT = require('./UnitClassT.js'),

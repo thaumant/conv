@@ -9,7 +9,6 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
 var _require = require("./util.js");
 
 var cloneDeep = _require.cloneDeep;
-var applyMethod = _require.applyMethod;
 var isPlainObject = _require.isPlainObject;
 var isArr = _require.isArr;
 var isFunc = _require.isFunc;

@@ -1,16 +1,4 @@
 
-function applyMethod(obj, method, args) {
-    if (args == null) return obj[method]()
-    switch (args.length) {
-        case 0:  return obj[method]()
-        case 1:  return obj[method](args[0])
-        case 2:  return obj[method](args[0], args[1])
-        case 3:  return obj[method](args[0], args[1], args[2])
-        default: return obj[method].apply(obj, args)
-    }
-}
-
-
 function cloneDeep(val) {
     if (val instanceof Array) {
         return val.map((child) => cloneDeep(child))
@@ -60,7 +48,6 @@ function getProtoChain(val, inclusive=false) {
 }
 
 
-exports.applyMethod = applyMethod
 exports.cloneDeep = cloneDeep
 exports.isPlainObject = isPlainObject
 exports.getProtoChain = getProtoChain
