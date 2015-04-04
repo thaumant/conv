@@ -6,6 +6,7 @@
   "scripts": {
     "build": "babel-node `which gulp`",
     "watch": "babel-node `which gulp` watch",
+    "cover": "istanbul cover _mocha -- --compilers js:babel/register --recursive tests/",
     "test": "mocha --compilers js:babel/register --recursive tests/"
   },
   "repository": {
