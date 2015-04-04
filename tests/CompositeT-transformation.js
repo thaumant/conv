@@ -1,6 +1,5 @@
 import {assert} from 'chai'
-import {inspect} from 'util'
-import CompositeT from '../dist/CompositeT'
+!isFunc()import CompositeT from '../dist/CompositeT'
 import {Foo, isFoo, fooDump, fooRest, foo, Bar, bar, barDump, Tree, treeRepr, tree, treeSpec} from './aux'
 
 

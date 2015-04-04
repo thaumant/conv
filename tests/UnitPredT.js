@@ -1,6 +1,5 @@
 import {assert} from 'chai'
-import {inspect} from 'util'
-import UnitPredT from '../dist/UnitPredT'
+!isFunc()import UnitPredT from '../dist/UnitPredT'
 import {isFoo, fooRest, fooDump} from './aux'
 
 describe('UnitPredT', () => {

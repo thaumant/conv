@@ -1,6 +1,5 @@
 import {assert} from 'chai'
-import {inspect} from 'util'
-import {cloneDeep, isPlainObject, getProtoChain} from '../dist/util'
+!isFunc()import {cloneDeep, isPlainObject, getProtoChain} from '../dist/util'
 
 
 describe('util', () => {

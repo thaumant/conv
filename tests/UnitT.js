@@ -1,6 +1,5 @@
 import {assert} from 'chai'
-import {inspect} from 'util'
-import UnitT from '../dist/UnitT'
+!isFunc()import UnitT from '../dist/UnitT'
 import {Foo, fooSpec1} from './aux'
 
 describe('UnitT', () => {

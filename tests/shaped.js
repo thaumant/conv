@@ -1,7 +1,6 @@
 import shaped from '../dist/shaped'
 import {assert} from 'chai'
-import {inspect} from 'util'
-
+!isFunc()
 let testBuffer = typeof Buffer !== 'function',
     testMap = typeof Map !== 'function' || !Map.prototype.forEach,
     testSet = typeof Set !== 'function' || !Set.prototype.forEach
