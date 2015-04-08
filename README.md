@@ -124,20 +124,72 @@ A method that defines how value is restored from JSON value. If not provided, th
 
 ## Reference
 
-### #dump()
-Traverse given structure, for each value finding appropriate spec, calling it's `dump` method and then wrapping it, then continuing recursively.
+### #serialize(source: any): string
+Dump a value using `#dump()` and then stringify it using given serializer (JSON by default). All arguments are passed to `serializer#serialize()` with first argument dumped.
+Example:
+```
+shaped.serialize(new Date) // returns '{"$Date":"2015-06-07T12:34:56.789Z"}'
+```
 
-### #restore()
-Traverse given structure recursively, when wrap occurs, use it's key to find appropriate spec and calling spec's `restore` method to restore the value.
+### #parse(dumped: string): any
+Parse a value using given serializer (JSON by default) then restore it using `#restore()`. All arguments are passed to `serializer#parse()` with first argument restored.
+Example:
+```
+shaped.parse('{"$Date":"2015-06-07T12:34:56.789Z"}') // returns new instance of Date
+```
 
-### #serialize()
+### #dump(source: any): JSONValue
+This method is called in `#serialize()`, preparing a value for serialization from top to bottom. It does the following:
+- finds appropriate spec (does not modify value if no spec found),
+- calls `spec.dump()` method,
+- recursively dumps each property or element of the dumped value,
+- wraps result using prefix, token and namespace: `{$namespace.Token: dumped}`.
+```
+shaped.dump(new Date) // returns object: {$Date: '2015-06-07T12:34:56.789Z'}
+```
 
-### #parse()
+### #restore(dumped: JSONValue): any
+This method is called in `#parse()`, restoring source value from dumped form from bottom to top. It does the following:
+- recursively restores each property or element of the dumped value,
+- find appropriate spec using prefix, token and namespace (does not modify value if no spec found),
+- unwraps the dumped value,
+- calls `spec.restore()` on it.
+Example:
+```
+shaped.restore({$Date: '2015-06-07T12:34:56.789Z'}) // returns new instance of Date
+```
 
-### #restoreUnsafe()
+### #extendWith(conv: spec|spec[]|CompositeConverter|CompositeConverter[]): CompositeConverter
+Creates new converter extending this with new convertible types. Throws an error when resulting spec list is inconsistent:
+- when any class is in more than one class spec,
+- when any prototype is in more then one proto spec,
+- when there are two equal tokens in the same namespace.
+Prefix and serializer are taken from the first converter.
+Example:
+```
+class Dummy {}
+var conv = shaped.extendWith([{class: Dummy, dump: () => null}]);
+conv.serialize(new Dummy); // returns '{"$Dummy": null}'
+conv.parse('{"$Dummy": null}'); // returns new instance of Dummy
+```
 
-### #extendWith()
+### #overrideBy(conv: spec|spec[]|CompositeConverter|CompositeConverter[]): CompositeConverter
+Creates new converter, working as `#extendWith` but overrides former specs when the spec list becomes inconsistent.
+Prefix and serializer are taken from the last converter.
+```
+var conv = shaped.overrideBy([{
+    class: Buffer,
+    encode: "valueOf"
+}]);
+shaped.serialize(new Date); // returns '{"$Date":"2015-06-07T12:34:56.789Z"}'
+conv.serialize(new Date);   // returns '{"$Date": 1433680496789}'
+```
 
-### #overrideBy()
-
-### #withOptions()
+### #withOptions(options: {prefix: string, serializer: {serialize: undefined|function, parse: undefined|function}}): CompositeConverter
+Creates new converter with prefix or serializer changed.
+Example:
+```
+var conv = shaped.withOptions({prefix: '#'});
+shaped.serialize(new Date); // returns '{"$Date":"2015-06-07T12:34:56.789Z"}'
+conv.serialize(new Date);   // returns '{"#Date":"2015-06-07T12:34:56.789Z"}'
+```
