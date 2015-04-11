@@ -1,4 +1,4 @@
-# Shaped
+# Conv
 [![Code Climate](https://codeclimate.com/github/thaumant/conv/badges/gpa.svg)](https://codeclimate.com/github/thaumant/conv)
 [![Test Coverage](https://codeclimate.com/github/thaumant/conv/badges/coverage.svg)](https://codeclimate.com/github/thaumant/conv)
 
@@ -92,8 +92,8 @@ There are three kinds of specs: class, proto and predicate specs. See [documenta
 
 # Gotchas
 
-- In `dump` method don't wrap the result in `{$Constructor: result}`, Shaped will do that for you.
-- Do not transform properties of the dumped value, Shaped will do that recursively after calling `spec.dump()` on source value. Dump works from top to bottom.
+- In `dump` method don't wrap the result in `{$Constructor: result}`, Conv will do that for you.
+- Do not transform properties of the dumped value, Conv will do that recursively after calling `spec.dump()` on source value. Dump works from top to bottom.
 - Restore works in the opposite direction: when dumped object is passed to `spec.restore()`, it's properties are already restored.
 - Check your spec: in almost all cases `val` should be equal `spec.restore(spec.dump(val))`, as well as `dumped` shold be equal `spec.dump(spec.restore(dumped))`.
 
