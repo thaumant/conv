@@ -1,8 +1,8 @@
 {
-  "name": "shaped",
+  "name": "conv",
   "version": "0.1.0",
   "description": "Represent JS datatypes as JSON values, serialize to and restore from any format",
-  "main": "dist/shaped.js",
+  "main": "dist/conv.js",
   "scripts": {
     "build": "babel-node `which gulp`",
     "watch": "babel-node `which gulp` watch",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/thaumant/shaped-js.git"
+    "url": "https://github.com/thaumant/conv.git"
   },
   "keywords": [
     "json",
@@ -23,9 +23,9 @@
   "author": "Elia Schelokov <thaumant@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/thaumant/shaped-js/issues"
+    "url": "https://github.com/thaumant/conv/issues"
   },
-  "homepage": "https://github.com/thaumant/shaped-js",
+  "homepage": "https://github.com/thaumant/conv",
   "dependencies": {},
   "devDependencies": {
     "chai": "^2.1.1",
