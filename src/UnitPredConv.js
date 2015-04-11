@@ -1,11 +1,11 @@
-const UnitT = require('./UnitT'),
+const UnitConv = require('./UnitConv'),
     {isFunc, isStr} = require('./util')
 
 
-module.exports = class UnitPredT extends UnitT {
+module.exports = class UnitPredConv extends UnitConv {
     constructor(spec) {
         let err = this.validateSpec(spec)
-        if (err) throw new Error(`Failed to create predicate transformer: ${err}`)
+        if (err) throw new Error(`Failed to create predicate converter: ${err}`)
         this.token     = spec.token
         this.pred      = spec.pred
         this.dump      = spec.dump
@@ -15,7 +15,7 @@ module.exports = class UnitPredT extends UnitT {
     }
 
     validateSpec(s) {
-        if (s instanceof UnitPredT)           return
+        if (s instanceof UnitPredConv)           return
         let err = super.validateSpec(s)
         if (err)                              return err
         switch (true) {

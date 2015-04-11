@@ -1,10 +1,10 @@
 const {isPlainObject} = require('lodash')
 
 
-module.exports = class UnitT {
+module.exports = class UnitConv {
 
     validateSpec(s) {
-        if (s instanceof UnitT)  return
+        if (s instanceof UnitConv)  return
         if (!isPlainObject(s))   return 'spec is not a plain object'
     }
 

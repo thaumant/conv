@@ -1,11 +1,11 @@
-const UnitT = require('./UnitT'),
+const UnitConv = require('./UnitConv'),
     {getProtoChain, isFunc, isStr} = require('./util')
 
 
-module.exports = class UnitClassT extends UnitT {
+module.exports = class UnitClassConv extends UnitConv {
     constructor(spec) {
         let err = this.validateSpec(spec)
-        if (err) throw new Error(`Failed to create class transformer: ${err}`)
+        if (err) throw new Error(`Failed to create class converter: ${err}`)
 
         this.class      = spec.class
         this.token      = spec.token     || spec.class.name
@@ -23,7 +23,7 @@ module.exports = class UnitClassT extends UnitT {
     }
 
     validateSpec(s) {
-        if (s instanceof UnitClassT) return
+        if (s instanceof UnitClassConv) return
         let err = super.validateSpec(s)
         if (err) return err
 

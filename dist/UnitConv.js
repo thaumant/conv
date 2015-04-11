@@ -9,14 +9,14 @@ var _require = require("lodash");
 var isPlainObject = _require.isPlainObject;
 
 module.exports = (function () {
-    function UnitT() {
-        _classCallCheck(this, UnitT);
+    function UnitConv() {
+        _classCallCheck(this, UnitConv);
     }
 
-    _createClass(UnitT, {
+    _createClass(UnitConv, {
         validateSpec: {
             value: function validateSpec(s) {
-                if (s instanceof UnitT) {
+                if (s instanceof UnitConv) {
                     return;
                 }if (!isPlainObject(s)) {
                     return "spec is not a plain object";
@@ -43,5 +43,5 @@ module.exports = (function () {
         }
     });
 
-    return UnitT;
+    return UnitConv;
 })();

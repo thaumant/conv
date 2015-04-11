@@ -1,11 +1,11 @@
-const UnitT = require('./UnitT'),
+const UnitConv = require('./UnitConv'),
     {getProtoChain, isStr, isFunc} = require('./util')
 
 
-module.exports = class UnitProtoT extends UnitT {
+module.exports = class UnitProtoConv extends UnitConv {
     constructor(spec) {
         let err = this.validateSpec(spec)
-        if (err) throw new Error(`Failed to create proto transformer: ${err}`)
+        if (err) throw new Error(`Failed to create proto converter: ${err}`)
 
         this.proto      = spec.proto
         this.token      = spec.token
@@ -25,7 +25,7 @@ module.exports = class UnitProtoT extends UnitT {
     
 
     validateSpec(s) {
-        if (s instanceof UnitProtoT) return
+        if (s instanceof UnitProtoConv) return
         let err = super.validateSpec(s)
         if (err) return err
 

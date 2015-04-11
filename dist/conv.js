@@ -1,6 +1,6 @@
 "use strict";
 
-var CompositeT = require("./CompositeT");
+var CompositeConv = require("./CompositeConv");
 
 var specs = [{ token: "Date", "class": Date }, { token: "RegExp", "class": RegExp, dump: function (r) {
         return r.source;
@@ -55,9 +55,9 @@ if (typeof Set === "function") {
     });
 }
 
-var stdT = new CompositeT(specs);
+var stdConv = new CompositeConv(specs);
 
-stdT.shaped = stdT;
-stdT.CompositeT = CompositeT;
+stdConv.conv = stdConv;
+stdConv.CompositeConv = CompositeConv;
 
-module.exports = stdT;
+module.exports = stdConv;

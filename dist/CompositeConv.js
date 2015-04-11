@@ -14,16 +14,16 @@ var isArr = _require.isArr;
 var isFunc = _require.isFunc;
 var isObj = _require.isObj;
 
-var UnitT = require("./UnitT.js"),
-    UnitClassT = require("./UnitClassT.js"),
-    UnitProtoT = require("./UnitProtoT.js"),
-    UnitPredT = require("./UnitPredT.js");
+var UnitConv = require("./UnitConv.js"),
+    UnitClassConv = require("./UnitClassConv.js"),
+    UnitProtoConv = require("./UnitProtoConv.js"),
+    UnitPredConv = require("./UnitPredConv.js");
 
 module.exports = (function () {
-    function CompositeT(specs) {
+    function CompositeConv(specs) {
         var opts = arguments[1] === undefined ? {} : arguments[1];
 
-        _classCallCheck(this, CompositeT);
+        _classCallCheck(this, CompositeConv);
 
         var err = undefined;
 
@@ -35,26 +35,26 @@ module.exports = (function () {
         if (err) throw new Error("Invalid serializer: " + err);
 
         if (!isArr(specs)) throw new Error("Expected array of specs");
-        this.unitTs = specs.map(this.makeUnitT);
-        this.predTs = this.unitTs.filter(function (t) {
-            return t instanceof UnitPredT;
+        this.unitConvs = specs.map(this.makeUnitConv);
+        this.predConvs = this.unitConvs.filter(function (t) {
+            return t instanceof UnitPredConv;
         });
-        this.classTs = this.unitTs.filter(function (t) {
-            return t instanceof UnitClassT;
+        this.classConvs = this.unitConvs.filter(function (t) {
+            return t instanceof UnitClassConv;
         }).sort(function (t1, t2) {
             return t2.protoChain.length - t1.protoChain.length;
         });
-        this.protoTs = this.unitTs.filter(function (t) {
-            return t instanceof UnitProtoT;
+        this.protoConvs = this.unitConvs.filter(function (t) {
+            return t instanceof UnitProtoConv;
         }).sort(function (t1, t2) {
             return t2.protoChain.length - t1.protoChain.length;
         });
 
-        err = this.validateConsistency(this.unitTs);
-        if (err) throw new Error("Inconsistent transformers: " + err);
+        err = this.validateConsistency(this.unitConvs);
+        if (err) throw new Error("Inconsistent converters: " + err);
     }
 
-    _createClass(CompositeT, {
+    _createClass(CompositeConv, {
         serialize: {
             value: function serialize() {
                 var s = this.options.serializer;
@@ -78,27 +78,27 @@ module.exports = (function () {
             value: function _dump(val) {
                 var mutate = arguments[1] === undefined ? false : arguments[1];
 
-                for (var i = 0; i < this.predTs.length; i++) {
-                    var predT = this.predTs[i];
-                    if (predT.pred(val)) {
-                        var dumped = predT.dump(val);
-                        return _defineProperty({}, this.options.prefix + predT.path, this._dump(dumped, true));
+                for (var i = 0; i < this.predConvs.length; i++) {
+                    var conv = this.predConvs[i];
+                    if (conv.pred(val)) {
+                        var dumped = conv.dump(val);
+                        return _defineProperty({}, this.options.prefix + conv.path, this._dump(dumped, true));
                     }
                 }
                 if (!val || typeof val !== "object") {
                     return val;
                 }
-                for (var i = 0; i < this.classTs.length; i++) {
-                    if (!(val instanceof this.classTs[i]["class"])) continue;
-                    var classT = this.classTs[i],
-                        dumped = classT.dump(val);
-                    return _defineProperty({}, this.options.prefix + classT.path, this._dump(dumped, true));
+                for (var i = 0; i < this.classConvs.length; i++) {
+                    if (!(val instanceof this.classConvs[i]["class"])) continue;
+                    var conv = this.classConvs[i],
+                        dumped = conv.dump(val);
+                    return _defineProperty({}, this.options.prefix + conv.path, this._dump(dumped, true));
                 }
-                for (var i = 0; i < this.protoTs.length; i++) {
-                    var protoT = this.protoTs[i];
-                    if (!protoT.proto.isPrototypeOf(val)) continue;
-                    var dumped = protoT.dump(val);
-                    return _defineProperty({}, this.options.prefix + protoT.path, this._dump(dumped, true));
+                for (var i = 0; i < this.protoConvs.length; i++) {
+                    var conv = this.protoConvs[i];
+                    if (!conv.proto.isPrototypeOf(val)) continue;
+                    var dumped = conv.dump(val);
+                    return _defineProperty({}, this.options.prefix + conv.path, this._dump(dumped, true));
                 }
                 if (val.constructor === Array) {
                     var copy = mutate ? val : [];
@@ -140,11 +140,11 @@ module.exports = (function () {
                 if (keys.length === 1 && keys[0].startsWith(this.options.prefix)) {
                     var key = keys[0],
                         path = key.slice(this.options.prefix.length);
-                    for (var i = 0; i < this.unitTs.length; i++) {
-                        var unitT = this.unitTs[i];
-                        if (unitT.path === path) {
+                    for (var i = 0; i < this.unitConvs.length; i++) {
+                        var conv = this.unitConvs[i];
+                        if (conv.path === path) {
                             var restoredChildren = this._restore(val[key]);
-                            return unitT.restore(restoredChildren);
+                            return conv.restore(restoredChildren);
                         }
                     }
                 }
@@ -158,16 +158,16 @@ module.exports = (function () {
                 if (!isArr(specs)) {
                     return this.extendWith([specs], options);
                 }var result = [];
-                this.unitTs.concat(specs).forEach(function (spec) {
-                    if (spec instanceof CompositeT) {
-                        spec.unitTs.forEach(function (unitT) {
-                            return result.push(unitT);
+                this.unitConvs.concat(specs).forEach(function (spec) {
+                    if (spec instanceof CompositeConv) {
+                        spec.unitConvs.forEach(function (conv) {
+                            return result.push(conv);
                         });
                     } else {
                         result.push(spec);
                     }
                 });
-                return new CompositeT(result, options || this.options);
+                return new CompositeConv(result, options || this.options);
             }
         },
         overrideBy: {
@@ -177,10 +177,10 @@ module.exports = (function () {
                 if (!isArr(specs)) {
                     return this.overrideBy([specs], options);
                 }var result = [];
-                this.unitTs.concat(specs).reverse().forEach(function (spec) {
-                    if (spec instanceof CompositeT) {
-                        spec.unitTs.reverse().forEach(function (unitT) {
-                            result.unshift(unitT);
+                this.unitConvs.concat(specs).reverse().forEach(function (spec) {
+                    if (spec instanceof CompositeConv) {
+                        spec.unitConvs.reverse().forEach(function (conv) {
+                            result.unshift(conv);
                             if (_this.validateConsistency(result)) result.shift();
                         });
                         options = spec.options;
@@ -189,65 +189,65 @@ module.exports = (function () {
                         if (_this.validateConsistency(result)) result.shift();
                     }
                 });
-                return new CompositeT(result, options || this.options);
+                return new CompositeConv(result, options || this.options);
             }
         },
         withOptions: {
             value: function withOptions() {
                 var opts = arguments[0] === undefined ? {} : arguments[0];
 
-                return new CompositeT(this.unitTs, {
+                return new CompositeConv(this.unitConvs, {
                     prefix: opts.prefix || this.options.prefix,
                     serializer: opts.serializer || this.options.serializer
                 });
             }
         },
-        makeUnitT: {
-            value: function makeUnitT(spec) {
+        makeUnitConv: {
+            value: function makeUnitConv(spec) {
                 switch (true) {
-                    case spec instanceof UnitT:
+                    case spec instanceof UnitConv:
                         return spec;
                     case spec && !!spec["class"]:
-                        return new UnitClassT(spec);
+                        return new UnitClassConv(spec);
                     case spec && !!spec.proto:
-                        return new UnitProtoT(spec);
+                        return new UnitProtoConv(spec);
                     case spec && !!spec.pred:
-                        return new UnitPredT(spec);
+                        return new UnitPredConv(spec);
                     default:
                         throw new Error("Invalid spec, no class, prototype or predicate");
                 }
             }
         },
         validateConsistency: {
-            value: function validateConsistency(unitTs) {
-                for (var i in unitTs) {
+            value: function validateConsistency(unitConvs) {
+                for (var i in unitConvs) {
                     var _ret = (function (i) {
-                        var unitT = unitTs[i],
-                            token = unitT.token,
-                            ns = unitT.namespace,
-                            sameNs = unitTs.filter(function (s) {
+                        var conv = unitConvs[i],
+                            token = conv.token,
+                            ns = conv.namespace,
+                            sameNs = unitConvs.filter(function (s) {
                             return s.namespace === ns;
                         }),
                             sameToken = sameNs.filter(function (s) {
                             return s.token === token;
                         });
                         if (sameToken.length > 1) return {
-                                v: "" + sameToken.length + " transformers for token " + token
+                                v: "" + sameToken.length + " converters for token " + token
                             };
-                        if (unitT instanceof UnitClassT) {
-                            var sameClass = unitTs.filter(function (t) {
-                                return t["class"] === unitT["class"];
+                        if (conv instanceof UnitClassConv) {
+                            var sameClass = unitConvs.filter(function (t) {
+                                return t["class"] === conv["class"];
                             });
                             if (sameClass.length > 1) return {
-                                    v: "" + sameClass.length + " transformers for class " + unitT["class"].name
+                                    v: "" + sameClass.length + " converters for class " + conv["class"].name
                                 };
                         }
-                        if (unitT instanceof UnitProtoT) {
-                            var sameProto = unitTs.filter(function (t) {
-                                return t.proto === unitT.proto;
+                        if (conv instanceof UnitProtoConv) {
+                            var sameProto = unitConvs.filter(function (t) {
+                                return t.proto === conv.proto;
                             });
                             if (sameProto.length > 1) return {
-                                    v: "" + sameProto.length + " transformers for proto " + unitT.token
+                                    v: "" + sameProto.length + " converters for proto " + conv.token
                                 };
                         }
                     })(i);
@@ -282,6 +282,6 @@ module.exports = (function () {
         }
     });
 
-    return CompositeT;
+    return CompositeConv;
 })();
 /* varargs */ /* varargs */

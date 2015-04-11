@@ -1,12 +1,12 @@
 const {cloneDeep, isPlainObject, isArr, isFunc, isObj} = require('./util.js')
 
-const UnitT    = require('./UnitT.js'),
-    UnitClassT = require('./UnitClassT.js'),
-    UnitProtoT = require('./UnitProtoT.js'),
-    UnitPredT  = require('./UnitPredT.js')
+const UnitConv    = require('./UnitConv.js'),
+    UnitClassConv = require('./UnitClassConv.js'),
+    UnitProtoConv = require('./UnitProtoConv.js'),
+    UnitPredConv  = require('./UnitPredConv.js')
 
 
-module.exports = class CompositeT {
+module.exports = class CompositeConv {
     constructor(specs, opts={}) {
         let err
 
@@ -18,17 +18,17 @@ module.exports = class CompositeT {
         if (err) throw new Error(`Invalid serializer: ${err}`)
 
         if (!isArr(specs)) throw new Error('Expected array of specs')
-        this.unitTs  = specs.map(this.makeUnitT)
-        this.predTs  = this.unitTs.filter((t) => t instanceof UnitPredT)
-        this.classTs = this.unitTs
-            .filter((t) => t instanceof UnitClassT)
+        this.unitConvs  = specs.map(this.makeUnitConv)
+        this.predConvs  = this.unitConvs.filter((t) => t instanceof UnitPredConv)
+        this.classConvs = this.unitConvs
+            .filter((t) => t instanceof UnitClassConv)
             .sort((t1, t2) => t2.protoChain.length - t1.protoChain.length)
-        this.protoTs = this.unitTs
-            .filter((t) => t instanceof UnitProtoT)
+        this.protoConvs = this.unitConvs
+            .filter((t) => t instanceof UnitProtoConv)
             .sort((t1, t2) => t2.protoChain.length - t1.protoChain.length)
 
-        err = this.validateConsistency(this.unitTs)
-        if (err) throw new Error(`Inconsistent transformers: ${err}`)
+        err = this.validateConsistency(this.unitConvs)
+        if (err) throw new Error(`Inconsistent converters: ${err}`)
     }
 
 
@@ -54,27 +54,27 @@ module.exports = class CompositeT {
 
 
     _dump(val, mutate=false) {
-        for (let i = 0; i < this.predTs.length; i++) {
-            let predT = this.predTs[i]
-            if (predT.pred(val)) {
-                let dumped = predT.dump(val)
-                return { [this.options.prefix + predT.path]: this._dump(dumped, true) }
+        for (let i = 0; i < this.predConvs.length; i++) {
+            let conv = this.predConvs[i]
+            if (conv.pred(val)) {
+                let dumped = conv.dump(val)
+                return { [this.options.prefix + conv.path]: this._dump(dumped, true) }
             }
         }
         if (!val || typeof val !== 'object') {
             return val
         }
-        for (let i = 0; i < this.classTs.length; i++) {
-            if (!(val instanceof this.classTs[i].class)) continue
-            let classT = this.classTs[i],
-                dumped = classT.dump(val)
-            return { [this.options.prefix + classT.path]: this._dump(dumped, true) }
+        for (let i = 0; i < this.classConvs.length; i++) {
+            if (!(val instanceof this.classConvs[i].class)) continue
+            let conv = this.classConvs[i],
+                dumped = conv.dump(val)
+            return { [this.options.prefix + conv.path]: this._dump(dumped, true) }
         }
-        for (let i = 0; i < this.protoTs.length; i++) {
-            let protoT = this.protoTs[i]
-            if (!protoT.proto.isPrototypeOf(val)) continue
-            let dumped = protoT.dump(val)
-            return { [this.options.prefix + protoT.path]: this._dump(dumped, true) }
+        for (let i = 0; i < this.protoConvs.length; i++) {
+            let conv = this.protoConvs[i]
+            if (!conv.proto.isPrototypeOf(val)) continue
+            let dumped = conv.dump(val)
+            return { [this.options.prefix + conv.path]: this._dump(dumped, true) }
         }
         if (val.constructor === Array) {
             let copy = mutate ? val : []
@@ -110,11 +110,11 @@ module.exports = class CompositeT {
         if (keys.length === 1 && keys[0].startsWith(this.options.prefix)) {
             let key = keys[0],
                 path = key.slice(this.options.prefix.length)
-            for (let i = 0; i < this.unitTs.length; i++) {
-                let unitT = this.unitTs[i]
-                if (unitT.path === path) {
+            for (let i = 0; i < this.unitConvs.length; i++) {
+                let conv = this.unitConvs[i]
+                if (conv.path === path) {
                     let restoredChildren = this._restore(val[key])
-                    return unitT.restore(restoredChildren)
+                    return conv.restore(restoredChildren)
                 }
             }
         }
@@ -126,24 +126,24 @@ module.exports = class CompositeT {
     extendWith(specs, options) {
         if (!isArr(specs)) return this.extendWith([specs], options)
         let result = []
-        this.unitTs.concat(specs).forEach((spec) => {
-            if (spec instanceof CompositeT) {
-                spec.unitTs.forEach((unitT) => result.push(unitT))
+        this.unitConvs.concat(specs).forEach((spec) => {
+            if (spec instanceof CompositeConv) {
+                spec.unitConvs.forEach((conv) => result.push(conv))
             } else {
                 result.push(spec)
             }
         })
-        return new CompositeT(result, options || this.options)
+        return new CompositeConv(result, options || this.options)
     }
 
 
     overrideBy(specs, options) {
         if (!isArr(specs)) return this.overrideBy([specs], options)
         let result = []
-        this.unitTs.concat(specs).reverse().forEach((spec) => {
-            if (spec instanceof CompositeT) {
-                spec.unitTs.reverse().forEach((unitT) => {
-                    result.unshift(unitT)
+        this.unitConvs.concat(specs).reverse().forEach((spec) => {
+            if (spec instanceof CompositeConv) {
+                spec.unitConvs.reverse().forEach((conv) => {
+                    result.unshift(conv)
                     if (this.validateConsistency(result)) result.shift()
                 })
                 options = spec.options
@@ -152,44 +152,44 @@ module.exports = class CompositeT {
                 if (this.validateConsistency(result)) result.shift()
             }
         })
-        return new CompositeT(result, options || this.options)
+        return new CompositeConv(result, options || this.options)
     }
 
 
     withOptions(opts={}) {
-        return new CompositeT(this.unitTs, {
+        return new CompositeConv(this.unitConvs, {
             prefix:     opts.prefix     || this.options.prefix,
             serializer: opts.serializer || this.options.serializer
         })
     }
 
 
-    makeUnitT(spec) {
+    makeUnitConv(spec) {
         switch (true) {
-            case spec instanceof UnitT: return spec
-            case spec && !!spec.class:  return new UnitClassT(spec)
-            case spec && !!spec.proto:  return new UnitProtoT(spec)
-            case spec && !!spec.pred:   return new UnitPredT(spec)
+            case spec instanceof UnitConv: return spec
+            case spec && !!spec.class:     return new UnitClassConv(spec)
+            case spec && !!spec.proto:     return new UnitProtoConv(spec)
+            case spec && !!spec.pred:      return new UnitPredConv(spec)
             default: throw new Error('Invalid spec, no class, prototype or predicate')
         }
     }
 
 
-    validateConsistency(unitTs) {
-        for (let i in unitTs) {
-            let unitT     = unitTs[i],
-                token     = unitT.token,
-                ns        = unitT.namespace,
-                sameNs    = unitTs.filter((s) => s.namespace === ns),
+    validateConsistency(unitConvs) {
+        for (let i in unitConvs) {
+            let conv      = unitConvs[i],
+                token     = conv.token,
+                ns        = conv.namespace,
+                sameNs    = unitConvs.filter((s) => s.namespace === ns),
                 sameToken = sameNs.filter((s) => s.token === token)
-            if (sameToken.length > 1)  return `${sameToken.length} transformers for token ${token}`
-            if (unitT instanceof UnitClassT) {
-                let sameClass = unitTs.filter((t) => t.class === unitT.class)
-                if (sameClass.length > 1) return `${sameClass.length} transformers for class ${unitT.class.name}`
+            if (sameToken.length > 1)  return `${sameToken.length} converters for token ${token}`
+            if (conv instanceof UnitClassConv) {
+                let sameClass = unitConvs.filter((t) => t.class === conv.class)
+                if (sameClass.length > 1) return `${sameClass.length} converters for class ${conv.class.name}`
             }
-            if(unitT instanceof UnitProtoT) {
-                let sameProto = unitTs.filter((t) => t.proto === unitT.proto)
-                if (sameProto.length > 1) return `${sameProto.length} transformers for proto ${unitT.token}`
+            if(conv instanceof UnitProtoConv) {
+                let sameProto = unitConvs.filter((t) => t.proto === conv.proto)
+                if (sameProto.length > 1) return `${sameProto.length} converters for proto ${conv.token}`
             }
         }
     }

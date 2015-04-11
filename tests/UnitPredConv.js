@@ -1,18 +1,18 @@
 import {assert} from 'chai'
-!isFunc()import UnitPredT from '../dist/UnitPredT'
+import UnitPredConv from '../dist/UnitPredConv'
 import {isFoo, fooRest, fooDump} from './aux'
 
-describe('UnitPredT', () => {
+describe('UnitPredConv', () => {
 
     describe('#validateSpec()', () => {
 
-        let val = UnitPredT.prototype.validateSpec.bind(UnitPredT.prototype)
+        let val = UnitPredConv.prototype.validateSpec.bind(UnitPredConv.prototype)
 
-        it('passes when given instance of UnitPredT', () => {
-            assert.strictEqual(undefined, val(new UnitPredT({token: 'Foo', pred: isFoo, dump: fooDump, restore: fooRest})))
+        it('passes when given instance of UnitPredConv', () => {
+            assert.strictEqual(undefined, val(new UnitPredConv({token: 'Foo', pred: isFoo, dump: fooDump, restore: fooRest})))
         })
 
-        it('calls UnitT#validateSpec() at first', () => {
+        it('calls UnitConv#validateSpec() at first', () => {
             assert.strictEqual('spec is not a plain object', val([]))
         })
 
@@ -49,43 +49,43 @@ describe('UnitPredT', () => {
 
     describe('#constructor()', () => {
 
-        let s1 = {token: 'Foo', pred: isFoo, dump: fooDump, restore: fooRest, namespace: 'foobar'},
-            s2 = {token: 'Foo', pred: isFoo, dump: fooDump, restore: fooRest, namespace: null}
+        let spec1 = {token: 'Foo', pred: isFoo, dump: fooDump, restore: fooRest, namespace: 'foobar'},
+            spec2 = {token: 'Foo', pred: isFoo, dump: fooDump, restore: fooRest, namespace: null}
 
-        let t1 = new UnitPredT(s1)
-        let t2 = new UnitPredT(s2)
+        let conv1 = new UnitPredConv(spec1)
+        let conv2 = new UnitPredConv(spec2)
 
         it('validates spec with #validateSpec(), throwing it\'s messages as errors', () => {
-            let test1 = () => new UnitPredT({pred: isFoo}),
-                test2 = () => new UnitPredT({token: 'Foo', pred: isFoo})
-            assert.throw(test1, 'Failed to create predicate transformer: missing token')
-            assert.throw(test2, 'Failed to create predicate transformer: missing dump method for Foo')
+            let test1 = () => new UnitPredConv({pred: isFoo}),
+                test2 = () => new UnitPredConv({token: 'Foo', pred: isFoo})
+            assert.throw(test1, 'Failed to create predicate converter: missing token')
+            assert.throw(test2, 'Failed to create predicate converter: missing dump method for Foo')
         })
 
         it('stores spec.token as token property', () => {
-            assert.strictEqual(s1.token, t1.token)
+            assert.strictEqual(spec1.token, conv1.token)
         })
 
         it('stores spec.pred as pred method', () => {
-            assert.strictEqual(s1.pred, t1.pred)
+            assert.strictEqual(spec1.pred, conv1.pred)
         })
 
         it('stores spec.dump as dump method', () => {
-            assert.strictEqual(s1.dump, t1.dump)
+            assert.strictEqual(spec1.dump, conv1.dump)
         })
 
         it('stores spec.restore as restore method', () => {
-            assert.strictEqual(s1.restore, t1.restore)
+            assert.strictEqual(spec1.restore, conv1.restore)
         })
 
         it('stores spec.namespace as namespace property', () => {
-            assert.strictEqual(t1.namespace, s1.namespace)
-            assert.strictEqual(t2.namespace, null)
+            assert.strictEqual(conv1.namespace, spec1.namespace)
+            assert.strictEqual(conv2.namespace, null)
         })
 
         it('sets path property as `namespace.token` or just `token`', () => {
-            assert.strictEqual(t1.path, s1.namespace + '.' + s1.token)
-            assert.strictEqual(t2.path, s2.token)
+            assert.strictEqual(conv1.path, spec1.namespace + '.' + spec1.token)
+            assert.strictEqual(conv2.path, spec2.token)
         })
 
     })

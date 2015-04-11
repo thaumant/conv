@@ -1,6 +1,6 @@
 # Shaped
-[![Code Climate](https://codeclimate.com/github/thaumant/shaped-js/badges/gpa.svg)](https://codeclimate.com/github/thaumant/shaped-js)
-[![Test Coverage](https://codeclimate.com/github/thaumant/shaped-js/badges/coverage.svg)](https://codeclimate.com/github/thaumant/shaped-js)
+[![Code Climate](https://codeclimate.com/github/thaumant/conv/badges/gpa.svg)](https://codeclimate.com/github/thaumant/conv)
+[![Test Coverage](https://codeclimate.com/github/thaumant/conv/badges/coverage.svg)](https://codeclimate.com/github/thaumant/conv)
 
 Represent JS datatypes as JSON values, serialize to and restore from any format.
 
@@ -13,16 +13,16 @@ Represent JS datatypes as JSON values, serialize to and restore from any format.
 
 # Features
 - Simple and readable way to serialize JS Date, RegExp, Buffer and ES6 types.
-- Define transformers for your own types.
+- Define converters for your own types.
 - Use JSON, BSON, YAML or any format you want.
 - Performance optimized.
 
 
 # Basic usage
 ```javascript
-shaped.parse('{"$Buffer":"Aw4P"}'); // returns <Buffer 03 0e 0f>
+conv.parse('{"$Buffer":"Aw4P"}'); // returns <Buffer 03 0e 0f>
 
-console.log(shaped.serialize(new Date, null, 4));
+console.log(conv.serialize(new Date, null, 4));
 /* arguments are passed to JSON.stringify, so it prints:
 {
     "$Date": "2015-06-07T12:34:56.789Z"
@@ -53,7 +53,7 @@ var spec = {class: Date};
 ```
 Make new extended converter using the spec:
 ```javascript
-var conv = shaped.extendWith([{class: Date}]);
+var conv = conv.extendWith([{class: Date}]);
 ```
 When you are defining converters for domain-specific types, use namespaces. There is a more elaborate example:
 ```javascript
@@ -68,7 +68,7 @@ class User {
     // ...
 }
 
-var conv = shaped.extendWith([{
+var conv = conv.extendWith([{
     class: User,
     namespace: 'mycompany'
     // user.toJSON() as dump() will be used by default
@@ -98,4 +98,4 @@ There are three kinds of specs: class, proto and predicate specs. See [documenta
 - Check your spec: in almost all cases `val` should be equal `spec.restore(spec.dump(val))`, as well as `dumped` shold be equal `spec.dump(spec.restore(dumped))`.
 
 # Documentation
-See the [wiki](../../wiki) for documentation and **shaped-immutable** for more examples.
+See the [wiki](../../wiki) for documentation and **conv-immutable** for more examples.

@@ -1,18 +1,18 @@
 import {assert} from 'chai'
-!isFunc()import UnitClassT from '../dist/UnitClassT'
+import UnitClassConv from '../dist/UnitClassConv'
 import {Foo, fooRest, fooDump, Bar, barRest, barDump} from './aux'
 
-describe('UnitClassT', () => {
+describe('UnitClassConv', () => {
 
     describe('#validateSpec()', () => {
 
-        let val = UnitClassT.prototype.validateSpec.bind(UnitClassT.prototype)
+        let val = UnitClassConv.prototype.validateSpec.bind(UnitClassConv.prototype)
 
-        it('passes when given instance of UnitClassT', () => {
-            assert.strictEqual(undefined, val(new UnitClassT({class: Bar})))
+        it('passes when given instance of UnitClassConv', () => {
+            assert.strictEqual(undefined, val(new UnitClassConv({class: Bar})))
         })
 
-        it('calls UnitT#validateSpec() at first', () => {
+        it('calls UnitConv#validateSpec() at first', () => {
             assert.strictEqual('spec is not a plain object', val([]))
         })
 
@@ -67,61 +67,61 @@ describe('UnitClassT', () => {
     describe('#constructor()', () => {
 
         it('performs #validateSpec()', () => {
-            let test1 = () => new UnitClassT({class: Foo, token: 2}),
-                test2 = () => new UnitClassT({token: 'Foo', class: Foo, restore: fooRest})
-            assert.throw(test1, 'Failed to create class transformer: invalid token for Foo')
-            assert.throw(test2, 'Failed to create class transformer: missing dump method for Foo')
+            let test1 = () => new UnitClassConv({class: Foo, token: 2}),
+                test2 = () => new UnitClassConv({token: 'Foo', class: Foo, restore: fooRest})
+            assert.throw(test1, 'Failed to create class converter: invalid token for Foo')
+            assert.throw(test2, 'Failed to create class converter: missing dump method for Foo')
         })
 
         it('stores spec.class as spec property', () => {
-            let t = new UnitClassT({class: Bar})
-            assert.strictEqual(Bar, t.class)
+            let c = new UnitClassConv({class: Bar})
+            assert.strictEqual(Bar, c.class)
         })
 
         it('stores spec.token if given, otherwise make token from class name', () => {
-            let t1 = new UnitClassT({class: Bar, token: 'Baz'}),
-                t2 = new UnitClassT({class: Bar})
-            assert.strictEqual('Baz', t1.token)
-            assert.strictEqual('Bar', t2.token)
+            let c1 = new UnitClassConv({class: Bar, token: 'Baz'}),
+                c2 = new UnitClassConv({class: Bar})
+            assert.strictEqual('Baz', c1.token)
+            assert.strictEqual('Bar', c2.token)
         })
 
         it('stores restore method if given, otherwise make restore method that calls class constructor', () => {
-            let t1 = new UnitClassT({class: Bar, restore: barRest}),
-                t2 = new UnitClassT({class: Bar}),
-                restored = t2.restore(3)
-            assert.strictEqual(barRest, t1.restore)
+            let c1 = new UnitClassConv({class: Bar, restore: barRest}),
+                c2 = new UnitClassConv({class: Bar}),
+                restored = c2.restore(3)
+            assert.strictEqual(barRest, c1.restore)
             assert.instanceOf(restored, Bar)
             assert.strictEqual(3, restored.arg1)
             assert.strictEqual(undefined, restored.arg2)
         })
 
         it('stores dump method as is if function given', () => {
-            let t = new UnitClassT({class: Bar, dump: barDump})
-            assert.strictEqual(barDump, t.dump)
+            let c = new UnitClassConv({class: Bar, dump: barDump})
+            assert.strictEqual(barDump, c.dump)
         })
 
         it('makes dump method that calls specified method if spec.dump method is string', () => {
-            let t = new UnitClassT({class: Bar, dump: 'bar'})
-            assert.strictEqual(24, t.dump(new Bar))
+            let c = new UnitClassConv({class: Bar, dump: 'bar'})
+            assert.strictEqual(24, c.dump(new Bar))
         })
 
         it('uses #toJSON() if exists and no dump method given', () => {
-            let t = new UnitClassT({class: Bar})
-            assert.strictEqual(42, t.dump(new Bar))
+            let c = new UnitClassConv({class: Bar})
+            assert.strictEqual(42, c.dump(new Bar))
         })
 
         it('stores spec.namespace as namespace property', () => {
-            let t1 = new UnitClassT({class: Bar, namespace: 'foobar'}),
-                t2 = new UnitClassT({class: Bar})
-            assert.strictEqual('foobar', t1.namespace)
-            assert.strictEqual(undefined, t2.namespace)
+            let c1 = new UnitClassConv({class: Bar, namespace: 'foobar'}),
+                c2 = new UnitClassConv({class: Bar})
+            assert.strictEqual('foobar', c1.namespace)
+            assert.strictEqual(undefined, c2.namespace)
         })
 
         it('sets path property as `namespace.token` or just `token` if no namespace', () => {
-            let t1 = new UnitClassT({class: Bar, namespace: 'foobar'}),
-                t2 = new UnitClassT({class: Bar})
-            assert.strictEqual(t1.path, 'foobar.Bar')
-            assert.strictEqual(t2.path, 'Bar')
+            let c1 = new UnitClassConv({class: Bar, namespace: 'foobar'}),
+                c2 = new UnitClassConv({class: Bar})
+            assert.strictEqual(c1.path, 'foobar.Bar')
+            assert.strictEqual(c2.path, 'Bar')
         })
 
     })

@@ -8,19 +8,19 @@ var _inherits = function (subClass, superClass) { if (typeof superClass !== "fun
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
 
-var UnitT = require("./UnitT");
+var UnitConv = require("./UnitConv");
 var _require = require("./util");
 
 var getProtoChain = _require.getProtoChain;
 var isStr = _require.isStr;
 var isFunc = _require.isFunc;
 
-module.exports = (function (_UnitT) {
-    function UnitProtoT(spec) {
-        _classCallCheck(this, UnitProtoT);
+module.exports = (function (_UnitConv) {
+    function UnitProtoConv(spec) {
+        _classCallCheck(this, UnitProtoConv);
 
         var err = this.validateSpec(spec);
-        if (err) throw new Error("Failed to create proto transformer: " + err);
+        if (err) throw new Error("Failed to create proto converter: " + err);
 
         this.proto = spec.proto;
         this.token = spec.token;
@@ -43,14 +43,14 @@ module.exports = (function (_UnitT) {
         }
     }
 
-    _inherits(UnitProtoT, _UnitT);
+    _inherits(UnitProtoConv, _UnitConv);
 
-    _createClass(UnitProtoT, {
+    _createClass(UnitProtoConv, {
         validateSpec: {
             value: function validateSpec(s) {
-                if (s instanceof UnitProtoT) {
+                if (s instanceof UnitProtoConv) {
                     return;
-                }var err = _get(Object.getPrototypeOf(UnitProtoT.prototype), "validateSpec", this).call(this, s);
+                }var err = _get(Object.getPrototypeOf(UnitProtoConv.prototype), "validateSpec", this).call(this, s);
                 if (err) {
                     return err;
                 }switch (true) {
@@ -118,5 +118,5 @@ module.exports = (function (_UnitT) {
         }
     });
 
-    return UnitProtoT;
-})(UnitT);
+    return UnitProtoConv;
+})(UnitConv);

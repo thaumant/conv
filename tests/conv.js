@@ -1,24 +1,24 @@
-import shaped from '../dist/shaped'
+import conv from '../dist/conv'
 import {assert} from 'chai'
-!isFunc()
+
 let testBuffer = typeof Buffer !== 'function',
     testMap = typeof Map !== 'function' || !Map.prototype.forEach,
     testSet = typeof Set !== 'function' || !Set.prototype.forEach
 
-describe('shaped', () => {
+describe('conv', () => {
 
     it('does not modify scalar values', () => {
-        assert.strictEqual(3, shaped.restore(3))
-        assert.strictEqual(3, shaped.dump(3))
-        assert.strictEqual('foo', shaped.restore('foo'))
-        assert.strictEqual('foo', shaped.dump('foo'))
+        assert.strictEqual(3, conv.restore(3))
+        assert.strictEqual(3, conv.dump(3))
+        assert.strictEqual('foo', conv.restore('foo'))
+        assert.strictEqual('foo', conv.dump('foo'))
     })
 
     it('dumps and restores Date', () => {
         let date = new Date,
             dumped = date.toJSON(),
-            restored = shaped.restore({$Date: dumped})
-        assert.deepEqual({$Date: dumped}, shaped.dump(date))
+            restored = conv.restore({$Date: dumped})
+        assert.deepEqual({$Date: dumped}, conv.dump(date))
         assert.instanceOf(restored, Date)
         assert.strictEqual(date.toString(), restored.toString())
     })
@@ -26,8 +26,8 @@ describe('shaped', () => {
     it('dumps and restores Buffer if presented', testBuffer ? undefined : () => {
         let buffer = new Buffer([3, 14, 15, 92, 6]),
             dumped = buffer.toString('base64'),
-            restored = shaped.restore({$Buffer: dumped})
-        assert.deepEqual({$Buffer: dumped}, shaped.dump(buffer))
+            restored = conv.restore({$Buffer: dumped})
+        assert.deepEqual({$Buffer: dumped}, conv.dump(buffer))
         assert.instanceOf(restored, Buffer)
         assert.strictEqual(buffer.inspect(), restored.inspect())
     })
@@ -38,8 +38,8 @@ describe('shaped', () => {
         map.set('bar', 'baz')
         let dumped = []
         map.forEach((val, key) => dumped.push([key, val]))
-        let restored = shaped.restore({$Map: dumped})
-        assert.deepEqual({$Map: dumped}, shaped.dump(map))
+        let restored = conv.restore({$Map: dumped})
+        assert.deepEqual({$Map: dumped}, conv.dump(map))
         assert.instanceOf(restored, Map)
         assert.strictEqual(2, restored.size)
         assert.strictEqual('foo', restored.get(3))
@@ -51,8 +51,8 @@ describe('shaped', () => {
         set.add(3)
         set.add('foo')
         let dumped = [3, 'foo'],
-            restored = shaped.restore({$Set: dumped})
-        assert.deepEqual({$Set: dumped}, shaped.dump(set))
+            restored = conv.restore({$Set: dumped})
+        assert.deepEqual({$Set: dumped}, conv.dump(set))
         assert.instanceOf(restored, Set)
         assert.strictEqual(2, restored.size)
         assert(true, restored.has(3))

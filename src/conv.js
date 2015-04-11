@@ -1,4 +1,4 @@
-const CompositeT = require('./CompositeT')
+const CompositeConv = require('./CompositeConv')
 
 
 let specs = [
@@ -47,11 +47,11 @@ if (typeof Set === 'function') {
     })
 }
 
-const stdT = new CompositeT(specs)
+const stdConv = new CompositeConv(specs)
 
 
-stdT.shaped = stdT
-stdT.CompositeT = CompositeT
+stdConv.conv = stdConv
+stdConv.CompositeConv = CompositeConv
 
 
-module.exports = stdT
+module.exports = stdConv

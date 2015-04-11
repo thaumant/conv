@@ -8,18 +8,18 @@ var _inherits = function (subClass, superClass) { if (typeof superClass !== "fun
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
 
-var UnitT = require("./UnitT");
+var UnitConv = require("./UnitConv");
 var _require = require("./util");
 
 var isFunc = _require.isFunc;
 var isStr = _require.isStr;
 
-module.exports = (function (_UnitT) {
-    function UnitPredT(spec) {
-        _classCallCheck(this, UnitPredT);
+module.exports = (function (_UnitConv) {
+    function UnitPredConv(spec) {
+        _classCallCheck(this, UnitPredConv);
 
         var err = this.validateSpec(spec);
-        if (err) throw new Error("Failed to create predicate transformer: " + err);
+        if (err) throw new Error("Failed to create predicate converter: " + err);
         this.token = spec.token;
         this.pred = spec.pred;
         this.dump = spec.dump;
@@ -28,14 +28,14 @@ module.exports = (function (_UnitT) {
         this.path = (this.namespace ? this.namespace + "." : "") + this.token;
     }
 
-    _inherits(UnitPredT, _UnitT);
+    _inherits(UnitPredConv, _UnitConv);
 
-    _createClass(UnitPredT, {
+    _createClass(UnitPredConv, {
         validateSpec: {
             value: function validateSpec(s) {
-                if (s instanceof UnitPredT) {
+                if (s instanceof UnitPredConv) {
                     return;
-                }var err = _get(Object.getPrototypeOf(UnitPredT.prototype), "validateSpec", this).call(this, s);
+                }var err = _get(Object.getPrototypeOf(UnitPredConv.prototype), "validateSpec", this).call(this, s);
                 if (err) {
                     return err;
                 }switch (true) {
@@ -65,5 +65,5 @@ module.exports = (function (_UnitT) {
         }
     });
 
-    return UnitPredT;
-})(UnitT);
+    return UnitPredConv;
+})(UnitConv);

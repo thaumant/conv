@@ -1,15 +1,15 @@
 import {assert} from 'chai'
-!isFunc()import UnitT from '../dist/UnitT'
+import UnitConv from '../dist/UnitConv'
 import {Foo, fooSpec1} from './aux'
 
-describe('UnitT', () => {
+describe('UnitConv', () => {
 
     describe('#validateSpec()', () => {
 
-        let val = UnitT.prototype.validateSpec
+        let val = UnitConv.prototype.validateSpec
 
-        it('passes when given instance of UnitT', () => {
-            assert.strictEqual(undefined, val(new UnitT()))
+        it('passes when given instance of UnitConv', () => {
+            assert.strictEqual(undefined, val(new UnitConv()))
         })
 
         it('tells if spec is not a plain object', () => {
@@ -26,7 +26,7 @@ describe('UnitT', () => {
 
     describe('#isValidName()', () => {
 
-        let val = UnitT.prototype.isValidName
+        let val = UnitConv.prototype.isValidName
 
         it('returns false when given invalid name for js variable', () => {
             assert.strictEqual(false, val('1'))
@@ -47,7 +47,7 @@ describe('UnitT', () => {
 
     describe('#isValidNS', () => {
 
-        let val = UnitT.prototype.isValidNS.bind(UnitT.prototype)
+        let val = UnitConv.prototype.isValidNS.bind(UnitConv.prototype)
 
         it('returns false when given a non-string', () => {
             assert.strictEqual(false, val())
