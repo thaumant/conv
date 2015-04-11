@@ -28,6 +28,7 @@
   "homepage": "https://github.com/thaumant/conv",
   "dependencies": {},
   "devDependencies": {
+    "babel": "^5.0.12",
     "chai": "^2.1.1",
     "del": "^1.1.1",
     "gulp": "^3.8.11",
