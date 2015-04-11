@@ -1,4 +1,4 @@
-const {isPlainObject} = require('lodash')
+const {isPlainObject} = require('./util')
 
 
 module.exports = class UnitConv {
