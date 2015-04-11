@@ -88,7 +88,7 @@ console.log(conv.serialize(user, null, 4))
 */
 ```
 
-There are three kinds of specs: class, proto and predicate specs. See [documentation](./wiki) for more info.
+There are three kinds of specs: class, proto and predicate specs. See [documentation](../../wiki) for more info.
 
 # Gotchas
 
@@ -98,4 +98,4 @@ There are three kinds of specs: class, proto and predicate specs. See [documenta
 - Check your spec: in almost all cases `val` should be equal `spec.restore(spec.dump(val))`, as well as `dumped` shold be equal `spec.dump(spec.restore(dumped))`.
 
 # Documentation
-See the [wiki](./wiki) for documentation and **shaped-immutable** for more examples.
+See the [wiki](../../wiki) for documentation and **shaped-immutable** for more examples.
