@@ -1,5 +1,5 @@
 import {assert} from 'chai'
-import {cloneDeep, isPlainObject, getProtoChain} from '../dist/util'
+import {cloneDeep, isPlainObject, getProtoChain, getFunctionName} from '../dist/util'
 
 
 describe('util', () => {
@@ -126,6 +126,29 @@ describe('util', () => {
             assert.strictEqual(date, dateChain[0])
             assert.strictEqual(Date.prototype,   dateChain[1])
             assert.strictEqual(Object.prototype, dateChain[2])
+        })
+
+    })
+
+    describe('getFunctionName()', () => {
+
+        it('returns a name of named function or class', () => {
+            function foo() {}
+            class Bar {}
+            assert.strictEqual('foo', getFunctionName(foo))
+            assert.strictEqual('Bar', getFunctionName(Bar))
+        })
+
+        it('returns null for anonymous functions', () => {
+            assert.strictEqual(null, getFunctionName(() => {}))
+        })
+
+        it('returns null for any value other than function', () => {
+            assert.strictEqual(null, getFunctionName(undefined))
+            assert.strictEqual(null, getFunctionName(null))
+            assert.strictEqual(null, getFunctionName(3))
+            assert.strictEqual(null, getFunctionName('foo'))
+            assert.strictEqual(null, getFunctionName({}))
         })
 
     })

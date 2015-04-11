@@ -36,6 +36,13 @@ function isObj(val) {
 function isArr(val) { return val instanceof Array }
 
 
+function getFunctionName(func) {
+    if (typeof func !== 'function') return null
+    let match = func.toString().match(/^function ([a-z_$][a-z_$\d]+)\(/i)
+    return match && match[1]
+}
+
+
 function getProtoChain(val, inclusive=false) {
     let result = inclusive ? [val] : []
     if (!(val && typeof val === 'object')) return result
@@ -56,3 +63,4 @@ exports.isStr = isStr
 exports.isNum = isNum
 exports.isArr = isArr
 exports.isObj = isObj
+exports.getFunctionName = getFunctionName

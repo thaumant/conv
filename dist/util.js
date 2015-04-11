@@ -46,6 +46,13 @@ function isArr(val) {
     return val instanceof Array;
 }
 
+function getFunctionName(func) {
+    if (typeof func !== "function") {
+        return null;
+    }var match = func.toString().match(/^function ([a-z_$][a-z_$\d]+)\(/i);
+    return match && match[1];
+}
+
 function getProtoChain(val) {
     var inclusive = arguments[1] === undefined ? false : arguments[1];
 
@@ -68,3 +75,4 @@ exports.isStr = isStr;
 exports.isNum = isNum;
 exports.isArr = isArr;
 exports.isObj = isObj;
+exports.getFunctionName = getFunctionName;
