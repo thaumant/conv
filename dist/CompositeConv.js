@@ -142,8 +142,8 @@ module.exports = (function () {
                 if (keys.length === 1 && keys[0].slice(0, prefix.length) === prefix) {
                     var key = keys[0],
                         path = key.slice(prefix.length);
-                    for (var k = 0; k < this.unitConvs.length; k++) {
-                        var conv = this.unitConvs[k];
+                    for (var i = 0; i < this.unitConvs.length; i++) {
+                        var conv = this.unitConvs[i];
                         if (conv.path === path) {
                             var restoredChildren = this._restore(val[key]);
                             return conv.restore(restoredChildren);
