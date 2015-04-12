@@ -1,6 +1,4 @@
-# Conv
-[![Build Status](https://travis-ci.org/thaumant/conv.svg?branch=master)](https://travis-ci.org/thaumant/conv)
-[![Coverage Status](https://coveralls.io/repos/thaumant/conv/badge.svg?branch=master)](https://coveralls.io/r/thaumant/conv?branch=master)
+# Conv [![Coverage Status](https://coveralls.io/repos/thaumant/conv/badge.svg?branch=master)](https://coveralls.io/r/thaumant/conv?branch=master) [![Build Status](https://travis-ci.org/thaumant/conv.svg?branch=master)](https://travis-ci.org/thaumant/conv)
 
 Represent JS datatypes as JSON values, serialize to and restore from any format.
 
@@ -15,7 +13,7 @@ Represent JS datatypes as JSON values, serialize to and restore from any format.
 - Simple and readable way to serialize JS Date, RegExp, Buffer and ES6 types.
 - Define converters for your own types.
 - Use JSON, BSON, YAML or any format you want.
-- Performance optimized.
+- Performance optimized, no dependencies.
 
 
 # Basic usage
