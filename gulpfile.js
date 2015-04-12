@@ -4,22 +4,35 @@ let gulp  = require('gulp'),
     del   = require('del')
 
 
-gulp.task('clean', (cb) => { del('dist', cb) })
+gulp.task('clean:dist', (cb) => { del(['dist'], cb) })
+
+gulp.task('clean:tests', (cb) => { del(['tests_compiled'], cb) })
+
+gulp.task('clean', ['clean:dist', 'clean:tests'])
 
 
-gulp.task('build', () =>
+
+gulp.task('build:dist', ['clean'], () =>
     gulp.src('src/**/*.js')
-        .pipe(babel())
+        .pipe(babel({blacklist: ["spec.functionName"]}))
         .pipe(gulp.dest('dist')))
 
+gulp.task('build:tests', ['clean'], () =>
+    gulp.src('tests/*.js')
+        .pipe(babel({blacklist: ["spec.functionName"]}))
+        .pipe(gulp.dest('tests_compiled')))
 
-gulp.task('test', () =>
-    gulp.src('tests/**/*.js', {read: false})
-        .pipe(mocha()))
+gulp.task('build', ['build:dist', 'build:tests'])
 
 
-gulp.task('watch', () =>
-    gulp.watch(['src/**/*.js', 'tests/**/*.js'], ['build', 'test']))
+
+// gulp.task('test', () =>
+//     gulp.src('tests/**/*.js', {read: false})
+//         .pipe(mocha()))
+
+
+// gulp.task('watch', () =>
+//     gulp.watch(['src/**/*.js', 'tests/**/*.js'], ['build', 'test']))
 
 
 gulp.task('default', ['clean', 'build'])
