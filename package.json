@@ -6,7 +6,8 @@
   "scripts": {
     "build": "babel-node `which gulp`",
     "test": "npm run build && mocha --recursive tests_compiled/",
-    "cover": "npm run build && istanbul cover _mocha -- --recursive tests_compiled/"
+    "cover": "npm run build && istanbul cover _mocha -- --recursive tests_compiled/",
+    "coverall": "npm run cover && cat coverage/lcov.info | coveralls"
   },
   "repository": {
     "type": "git",
