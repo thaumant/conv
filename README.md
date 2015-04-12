@@ -1,6 +1,6 @@
 # Conv
-[![Code Climate](https://codeclimate.com/github/thaumant/conv/badges/gpa.svg)](https://codeclimate.com/github/thaumant/conv)
-[![Test Coverage](https://codeclimate.com/github/thaumant/conv/badges/coverage.svg)](https://codeclimate.com/github/thaumant/conv)
+[![Build Status](https://travis-ci.org/thaumant/conv.svg?branch=master)](https://travis-ci.org/thaumant/conv)
+[![Coverage Status](https://coveralls.io/repos/thaumant/conv/badge.svg?branch=master)](https://coveralls.io/r/thaumant/conv?branch=master)
 
 Represent JS datatypes as JSON values, serialize to and restore from any format.
 
