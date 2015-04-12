@@ -14,6 +14,7 @@ var _require = require("./util");
 var getProtoChain = _require.getProtoChain;
 var isFunc = _require.isFunc;
 var isStr = _require.isStr;
+var getFunctionName = _require.getFunctionName;
 
 module.exports = (function (_UnitConv) {
     function UnitClassConv(spec) {
@@ -23,7 +24,7 @@ module.exports = (function (_UnitConv) {
         if (err) throw new Error("Failed to create class converter: " + err);
 
         this["class"] = spec["class"];
-        this.token = spec.token || spec["class"].name;
+        this.token = spec.token || getFunctionName(spec["class"]);
         this.restore = spec.restore || function (dumped) {
             return new spec["class"](dumped);
         };
@@ -56,7 +57,7 @@ module.exports = (function (_UnitConv) {
                 }var err = _get(Object.getPrototypeOf(UnitClassConv.prototype), "validateSpec", this).call(this, s);
                 if (err) {
                     return err;
-                }var maybeToken = this.isValidName(s.token) && s.token || s["class"] && s["class"].name,
+                }var maybeToken = this.isValidName(s.token) && s.token || getFunctionName(s["class"]),
                     forToken = maybeToken ? " for " + maybeToken : "";
 
                 switch (true) {

@@ -13,6 +13,7 @@ var isPlainObject = _require.isPlainObject;
 var isArr = _require.isArr;
 var isFunc = _require.isFunc;
 var isObj = _require.isObj;
+var getFunctionName = _require.getFunctionName;
 
 var UnitConv = require("./UnitConv.js"),
     UnitClassConv = require("./UnitClassConv.js"),
@@ -136,12 +137,13 @@ module.exports = (function () {
                         val[i] = this._restore(val[i]);
                     }return val;
                 }
-                var keys = Object.keys(val);
-                if (keys.length === 1 && keys[0].startsWith(this.options.prefix)) {
+                var keys = Object.keys(val),
+                    prefix = this.options.prefix;
+                if (keys.length === 1 && keys[0].slice(0, prefix.length) === prefix) {
                     var key = keys[0],
-                        path = key.slice(this.options.prefix.length);
-                    for (var i = 0; i < this.unitConvs.length; i++) {
-                        var conv = this.unitConvs[i];
+                        path = key.slice(prefix.length);
+                    for (var k = 0; k < this.unitConvs.length; k++) {
+                        var conv = this.unitConvs[k];
                         if (conv.path === path) {
                             var restoredChildren = this._restore(val[key]);
                             return conv.restore(restoredChildren);
@@ -239,7 +241,7 @@ module.exports = (function () {
                                 return t["class"] === conv["class"];
                             });
                             if (sameClass.length > 1) return {
-                                    v: "" + sameClass.length + " converters for class " + conv["class"].name
+                                    v: "" + sameClass.length + " converters for class " + getFunctionName(conv["class"])
                                 };
                         }
                         if (conv instanceof UnitProtoConv) {

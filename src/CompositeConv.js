@@ -1,4 +1,4 @@
-const {cloneDeep, isPlainObject, isArr, isFunc, isObj} = require('./util.js')
+const {cloneDeep, isPlainObject, isArr, isFunc, isObj, getFunctionName} = require('./util.js')
 
 const UnitConv    = require('./UnitConv.js'),
     UnitClassConv = require('./UnitClassConv.js'),
@@ -106,10 +106,11 @@ module.exports = class CompositeConv {
             for (let i = 0; i < val.length; i++) val[i] = this._restore(val[i])
             return val
         }
-        let keys = Object.keys(val)
-        if (keys.length === 1 && keys[0].startsWith(this.options.prefix)) {
+        let keys = Object.keys(val),
+            prefix = this.options.prefix
+        if (keys.length === 1 && keys[0].slice(0, prefix.length) === prefix) {
             let key = keys[0],
-                path = key.slice(this.options.prefix.length)
+                path = key.slice(prefix.length)
             for (let i = 0; i < this.unitConvs.length; i++) {
                 let conv = this.unitConvs[i]
                 if (conv.path === path) {
@@ -185,7 +186,7 @@ module.exports = class CompositeConv {
             if (sameToken.length > 1)  return `${sameToken.length} converters for token ${token}`
             if (conv instanceof UnitClassConv) {
                 let sameClass = unitConvs.filter((t) => t.class === conv.class)
-                if (sameClass.length > 1) return `${sameClass.length} converters for class ${conv.class.name}`
+                if (sameClass.length > 1) return `${sameClass.length} converters for class ${getFunctionName(conv.class)}`
             }
             if(conv instanceof UnitProtoConv) {
                 let sameProto = unitConvs.filter((t) => t.proto === conv.proto)

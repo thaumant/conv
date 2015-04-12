@@ -1,5 +1,5 @@
 const UnitConv = require('./UnitConv'),
-    {getProtoChain, isFunc, isStr} = require('./util')
+    {getProtoChain, isFunc, isStr, getFunctionName} = require('./util')
 
 
 module.exports = class UnitClassConv extends UnitConv {
@@ -8,7 +8,7 @@ module.exports = class UnitClassConv extends UnitConv {
         if (err) throw new Error(`Failed to create class converter: ${err}`)
 
         this.class      = spec.class
-        this.token      = spec.token     || spec.class.name
+        this.token      = spec.token     || getFunctionName(spec.class)
         this.restore    = spec.restore   || (dumped) => new spec.class(dumped)
         this.namespace  = spec.namespace
         this.path       = (this.namespace ? this.namespace + '.' : '') + this.token
@@ -27,7 +27,7 @@ module.exports = class UnitClassConv extends UnitConv {
         let err = super.validateSpec(s)
         if (err) return err
 
-        let maybeToken = (this.isValidName(s.token) && s.token) || (s.class && s.class.name),
+        let maybeToken = (this.isValidName(s.token) && s.token) || getFunctionName(s.class),
             forToken = maybeToken ? ` for ${maybeToken}` : ''
 
         switch (true) {
