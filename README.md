@@ -13,6 +13,7 @@ Represent JS datatypes as JSON values, serialize to and restore from any format.
 - Simple and readable way to serialize JS Date, RegExp, Buffer and ES6 types.
 - Define converters for your own types.
 - Use JSON, BSON, YAML or any format you want.
+- Converters composition with consistency checks included.
 - Performance optimized, no dependencies.
 
 
