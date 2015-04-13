@@ -176,7 +176,7 @@ module.exports = class CompositeConv {
     }
 
 
-    withExcluded(selected={}, unitConvs) {
+    exclude(selected={}, unitConvs) {
         let unitConvs = this.unitConvs
         switch (true) {
             case Boolean(selected.class):

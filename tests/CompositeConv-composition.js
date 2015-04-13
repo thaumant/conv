@@ -141,21 +141,21 @@ describe('CompositeConv (composition)', () => {
 
     })
 
-    describe('#withExcluded()', () => {
+    describe('#exclude()', () => {
 
-        it('removes a class from unit converters when class specified', () => {
+        it('removes a unit converter with specified class', () => {
             let c1 = new CompositeConv([{class: Bar}, {class: Baz}]),
-                c2 = c1.withExcluded({class: Baz})
+                c2 = c1.exclude({class: Baz})
             assert.instanceOf(c2, CompositeConv)
             assert.lengthOf(c2.unitConvs, 1)
             assert.strictEqual(c2.unitConvs[0].class, Bar)
         })
 
-        it('removes a proto from unit converters when proto specified', () => {
+        it('removes a unit converter with specified proto', () => {
             let fooProto = {foo: 3},
                 barProto = {bar: 14},
                 c1 = new CompositeConv([{token: 'Foo', proto: fooProto}, {token: 'Bar', proto: barProto}]),
-                c2 = c1.withExcluded({proto: fooProto})
+                c2 = c1.exclude({proto: fooProto})
             assert.instanceOf(c2, CompositeConv)
             assert.lengthOf(c2.unitConvs, 1)
             assert.strictEqual(c2.unitConvs[0].proto, barProto)
@@ -166,7 +166,7 @@ describe('CompositeConv (composition)', () => {
                     {token: 'Foo', class: Bar},
                     {token: 'Foo', class: Baz, namespace: 'baz'}
                 ]),
-                c2 = c1.withExcluded({token: 'Foo'})
+                c2 = c1.exclude({token: 'Foo'})
             assert.instanceOf(c2, CompositeConv)
             assert.lengthOf(c2.unitConvs, 1)
             assert.strictEqual(c2.unitConvs[0].class, Baz)
@@ -177,7 +177,7 @@ describe('CompositeConv (composition)', () => {
                     {token: 'Foo', class: Bar},
                     {token: 'Foo', class: Baz, namespace: 'baz'}
                 ]),
-                c2 = c1.withExcluded({namespace: 'baz'})
+                c2 = c1.exclude({namespace: 'baz'})
             assert.instanceOf(c2, CompositeConv)
             assert.lengthOf(c2.unitConvs, 1)
             assert.strictEqual(c2.unitConvs[0].class, Bar)
@@ -188,7 +188,7 @@ describe('CompositeConv (composition)', () => {
                     {token: 'Foo', class: Bar},
                     {token: 'Foo', class: Baz, namespace: 'baz'}
                 ]),
-                c2 = c1.withExcluded({token: 'Foo', namespace: 'baz'})
+                c2 = c1.exclude({token: 'Foo', namespace: 'baz'})
             assert.lengthOf(c2.unitConvs, 1)
             assert.strictEqual(c2.unitConvs[0].class, Bar)
         })

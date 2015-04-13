@@ -220,8 +220,8 @@ module.exports = (function () {
                 }
             }
         },
-        withExcluded: {
-            value: function withExcluded(_x, unitConvs) {
+        exclude: {
+            value: function exclude(_x, unitConvs) {
                 var selected = arguments[0] === undefined ? {} : arguments[0];
 
                 var unitConvs = this.unitConvs;
