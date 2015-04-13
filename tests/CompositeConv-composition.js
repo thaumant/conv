@@ -141,4 +141,58 @@ describe('CompositeConv (composition)', () => {
 
     })
 
+    describe('#withExcluded()', () => {
+
+        it('removes a class from unit converters when class specified', () => {
+            let c1 = new CompositeConv([{class: Bar}, {class: Baz}]),
+                c2 = c1.withExcluded({class: Baz})
+            assert.instanceOf(c2, CompositeConv)
+            assert.lengthOf(c2.unitConvs, 1)
+            assert.strictEqual(c2.unitConvs[0].class, Bar)
+        })
+
+        it('removes a proto from unit converters when proto specified', () => {
+            let fooProto = {foo: 3},
+                barProto = {bar: 14},
+                c1 = new CompositeConv([{token: 'Foo', proto: fooProto}, {token: 'Bar', proto: barProto}]),
+                c2 = c1.withExcluded({proto: fooProto})
+            assert.instanceOf(c2, CompositeConv)
+            assert.lengthOf(c2.unitConvs, 1)
+            assert.strictEqual(c2.unitConvs[0].proto, barProto)
+        })
+
+        it('removes a unit converter with specified token', () => {
+            let c1 = new CompositeConv([
+                    {token: 'Foo', class: Bar},
+                    {token: 'Foo', class: Baz, namespace: 'baz'}
+                ]),
+                c2 = c1.withExcluded({token: 'Foo'})
+            assert.instanceOf(c2, CompositeConv)
+            assert.lengthOf(c2.unitConvs, 1)
+            assert.strictEqual(c2.unitConvs[0].class, Baz)
+        })
+
+        it('removes a unit converter with specified namespace', () => {
+            let c1 = new CompositeConv([
+                    {token: 'Foo', class: Bar},
+                    {token: 'Foo', class: Baz, namespace: 'baz'}
+                ]),
+                c2 = c1.withExcluded({namespace: 'baz'})
+            assert.instanceOf(c2, CompositeConv)
+            assert.lengthOf(c2.unitConvs, 1)
+            assert.strictEqual(c2.unitConvs[0].class, Bar)
+        })
+
+        it('removes a unit converter with specified token and namespace', () => {
+            let c1 = new CompositeConv([
+                    {token: 'Foo', class: Bar},
+                    {token: 'Foo', class: Baz, namespace: 'baz'}
+                ]),
+                c2 = c1.withExcluded({token: 'Foo', namespace: 'baz'})
+            assert.lengthOf(c2.unitConvs, 1)
+            assert.strictEqual(c2.unitConvs[0].class, Bar)
+        })
+
+    })
+
 })

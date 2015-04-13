@@ -176,6 +176,27 @@ module.exports = class CompositeConv {
     }
 
 
+    withExcluded(selected={}, unitConvs) {
+        let unitConvs = this.unitConvs
+        switch (true) {
+            case Boolean(selected.class):
+                unitConvs = unitConvs.filter((u) => u.class !== selected.class)
+                break
+            case Boolean(selected.proto):
+                unitConvs = unitConvs.filter((u) => u.proto !== selected.proto)
+                break
+            case Boolean(selected.token):
+                unitConvs = unitConvs.filter((u) => u.namespace != selected.namespace || u.token !== selected.token)
+                break
+            case Boolean(selected.namespace):
+                unitConvs = unitConvs.filter((u) => u.namespace !== selected.namespace)
+                break
+            default: null
+        }
+        return new CompositeConv(unitConvs, this.optionsn)
+    }
+
+
     validateConsistency(unitConvs) {
         for (let i in unitConvs) {
             let conv      = unitConvs[i],

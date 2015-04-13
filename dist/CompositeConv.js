@@ -220,6 +220,38 @@ module.exports = (function () {
                 }
             }
         },
+        withExcluded: {
+            value: function withExcluded(_x, unitConvs) {
+                var selected = arguments[0] === undefined ? {} : arguments[0];
+
+                var unitConvs = this.unitConvs;
+                switch (true) {
+                    case Boolean(selected["class"]):
+                        unitConvs = unitConvs.filter(function (u) {
+                            return u["class"] !== selected["class"];
+                        });
+                        break;
+                    case Boolean(selected.proto):
+                        unitConvs = unitConvs.filter(function (u) {
+                            return u.proto !== selected.proto;
+                        });
+                        break;
+                    case Boolean(selected.token):
+                        unitConvs = unitConvs.filter(function (u) {
+                            return u.namespace != selected.namespace || u.token !== selected.token;
+                        });
+                        break;
+                    case Boolean(selected.namespace):
+                        unitConvs = unitConvs.filter(function (u) {
+                            return u.namespace !== selected.namespace;
+                        });
+                        break;
+                    default:
+                        null;
+                }
+                return new CompositeConv(unitConvs, this.optionsn);
+            }
+        },
         validateConsistency: {
             value: function validateConsistency(unitConvs) {
                 for (var i in unitConvs) {
