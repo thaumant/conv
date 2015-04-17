@@ -1,6 +1,6 @@
 {
   "name": "conv",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Represent JS datatypes as JSON values, serialize to and restore from any format",
   "main": "dist/conv.js",
   "scripts": {
