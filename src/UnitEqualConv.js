@@ -12,8 +12,8 @@ module.exports = class UnitEqualConv extends UnitConv {
         this.namespace  = spec.namespace
         this.path       = (this.namespace ? this.namespace + '.' : '') + this.token
 
-        this.dump       = spec.dump
-        this.restore    = spec.restore
+        this.dump       = () => null
+        this.restore    = () => this.value
     }
     
 
@@ -31,16 +31,6 @@ module.exports = class UnitEqualConv extends UnitConv {
             case s.namespace == null:             break
             case this.isValidNS(s.namespace):     break
             default:                              return `invalid namespace for ${s.token}`
-        }
-        switch (true) {
-            case s.restore == null:               return `missing restore method for ${s.token}`
-            case typeof s.restore === 'function': break
-            default:                              return `invalid restore method for ${s.token}`
-        }
-        switch (true) {
-            case s.dump == null:                  return `missing dump method for ${s.token}`
-            case typeof s.dump === 'string':      break
-            default:                              return `invalid dump method for ${s.token}`
         }
     }
 

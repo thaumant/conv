@@ -17,6 +17,8 @@ var isFunc = _require.isFunc;
 
 module.exports = (function (_UnitConv) {
     function UnitEqualConv(spec) {
+        var _this = this;
+
         _classCallCheck(this, UnitEqualConv);
 
         var err = this.validateSpec(spec);
@@ -27,8 +29,12 @@ module.exports = (function (_UnitConv) {
         this.namespace = spec.namespace;
         this.path = (this.namespace ? this.namespace + "." : "") + this.token;
 
-        this.dump = spec.dump;
-        this.restore = spec.restore;
+        this.dump = function () {
+            return null;
+        };
+        this.restore = function () {
+            return _this.value;
+        };
     }
 
     _inherits(UnitEqualConv, _UnitConv);
@@ -56,22 +62,6 @@ module.exports = (function (_UnitConv) {
                         break;
                     default:
                         return "invalid namespace for " + s.token;
-                }
-                switch (true) {
-                    case s.restore == null:
-                        return "missing restore method for " + s.token;
-                    case typeof s.restore === "function":
-                        break;
-                    default:
-                        return "invalid restore method for " + s.token;
-                }
-                switch (true) {
-                    case s.dump == null:
-                        return "missing dump method for " + s.token;
-                    case typeof s.dump === "string":
-                        break;
-                    default:
-                        return "invalid dump method for " + s.token;
                 }
             }
         }

@@ -59,8 +59,7 @@ module.exports = class CompositeConv {
         for (let i = 0; i < this.equalConvs.length; i++) {
             let conv = this.equalConvs[i]
             if (conv.value === val) {
-                let dumped = conv.dump(val)
-                return { [this.options.prefix + conv.path]: this._dump(dumped, true) }
+                return { [this.options.prefix + conv.path]: null }
             }
         }
         for (let i = 0; i < this.predConvs.length; i++) {

@@ -87,8 +87,7 @@ module.exports = (function () {
                 for (var i = 0; i < this.equalConvs.length; i++) {
                     var conv = this.equalConvs[i];
                     if (conv.value === val) {
-                        var dumped = conv.dump(val);
-                        return _defineProperty({}, this.options.prefix + conv.path, this._dump(dumped, true));
+                        return _defineProperty({}, this.options.prefix + conv.path, null);
                     }
                 }
                 for (var i = 0; i < this.predConvs.length; i++) {
