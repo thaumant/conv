@@ -1,4 +1,9 @@
 
+function has(obj, key) {
+    if (!isObj(obj)) return false
+    return obj.hasOwnProperty(key)
+}
+
 function cloneDeep(val) {
     if (val instanceof Array) {
         return val.map((child) => cloneDeep(child))
@@ -55,6 +60,7 @@ function getProtoChain(val, inclusive=false) {
 }
 
 
+exports.has = has
 exports.cloneDeep = cloneDeep
 exports.isPlainObject = isPlainObject
 exports.getProtoChain = getProtoChain
