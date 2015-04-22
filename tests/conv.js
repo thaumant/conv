@@ -7,11 +7,16 @@ let testBuffer = typeof Buffer !== 'function',
 
 describe('conv', () => {
 
-    it('does not modify scalar values', () => {
+    it('does not modify scalar values except Infinity', () => {
         assert.strictEqual(3, conv.restore(3))
         assert.strictEqual(3, conv.dump(3))
         assert.strictEqual('foo', conv.restore('foo'))
         assert.strictEqual('foo', conv.dump('foo'))
+    })
+
+    it('dumps and restores positeive and negative infinity', () => {
+        assert.deepEqual({$PosInfinity: null}, conv.dump(Infinity))
+        assert.deepEqual({$NegInfinity: null}, conv.dump(-Infinity))
     })
 
     it('dumps and restores Date', () => {
