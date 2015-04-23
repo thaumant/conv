@@ -15,8 +15,8 @@ describe('conv', () => {
     })
 
     it('dumps and restores positeive and negative infinity', () => {
-        assert.deepEqual({$PosInfinity: null}, conv.dump(Infinity))
-        assert.deepEqual({$NegInfinity: null}, conv.dump(-Infinity))
+        assert.deepEqual({$Infinity: 1}, conv.dump(Infinity))
+        assert.deepEqual({$Infinity: -1}, conv.dump(-Infinity))
     })
 
     it('dumps and restores Date', () => {

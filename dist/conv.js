@@ -2,9 +2,27 @@
 
 var CompositeConv = require("./CompositeConv");
 
-var specs = [{ token: "Date", "class": Date }, { token: "RegExp", "class": RegExp, dump: function (r) {
+var specs = [{
+    token: "Infinity",
+    pred: function (x) {
+        return x === Infinity || x === -Infinity;
+    },
+    dump: function (x) {
+        return x === Infinity ? 1 : -1;
+    },
+    restore: function (x) {
+        return x === 1 ? Infinity : -Infinity;
+    }
+}, {
+    token: "Date",
+    "class": Date
+}, {
+    token: "RegExp",
+    "class": RegExp,
+    dump: function (r) {
         return r.source;
-    } }];
+    }
+}];
 
 if (typeof Buffer === "function") specs.push({
     token: "Buffer",

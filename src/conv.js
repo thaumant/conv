@@ -2,8 +2,21 @@ const CompositeConv = require('./CompositeConv')
 
 
 let specs = [
-    {token: 'Date', class: Date},
-    {token: 'RegExp', class: RegExp, dump: (r) => r.source}
+    {
+        token:   'Infinity',
+        pred:    (x) => x === Infinity || x === -Infinity,
+        dump:    (x) => x === Infinity ? 1 : -1,
+        restore: (x) => x === 1 ? Infinity : -Infinity
+    },
+    {
+        token: 'Date',
+        class: Date
+    },
+    {
+        token: 'RegExp',
+        class: RegExp,
+        dump: (r) => r.source
+    }
 ]
 
 if (typeof Buffer === 'function')
