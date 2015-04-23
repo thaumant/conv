@@ -2,7 +2,7 @@
 
 var CompositeConv = require("./CompositeConv");
 
-var specs = [{ token: "PosInfinity", value: Infinity }, { token: "NegInfinity", value: -Infinity }, { token: "Date", "class": Date }, { token: "RegExp", "class": RegExp, dump: function (r) {
+var specs = [{ token: "Date", "class": Date }, { token: "RegExp", "class": RegExp, dump: function (r) {
         return r.source;
     } }];
 

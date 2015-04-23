@@ -2,8 +2,6 @@ const CompositeConv = require('./CompositeConv')
 
 
 let specs = [
-    {token: 'PosInfinity', value: Infinity},
-    {token: 'NegInfinity', value: -Infinity},
     {token: 'Date', class: Date},
     {token: 'RegExp', class: RegExp, dump: (r) => r.source}
 ]
