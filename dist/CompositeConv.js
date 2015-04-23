@@ -19,8 +19,7 @@ var has = _require.has;
 var UnitConv = require("./UnitConv.js"),
     UnitClassConv = require("./UnitClassConv.js"),
     UnitProtoConv = require("./UnitProtoConv.js"),
-    UnitPredConv = require("./UnitPredConv.js"),
-    UnitEqualConv = require("./UnitEqualConv.js");
+    UnitPredConv = require("./UnitPredConv.js");
 
 module.exports = (function () {
     function CompositeConv(specs) {
@@ -41,9 +40,6 @@ module.exports = (function () {
         this.unitConvs = specs.map(this.makeUnitConv);
         this.predConvs = this.unitConvs.filter(function (t) {
             return t instanceof UnitPredConv;
-        });
-        this.equalConvs = this.unitConvs.filter(function (t) {
-            return t instanceof UnitEqualConv;
         });
         this.classConvs = this.unitConvs.filter(function (t) {
             return t instanceof UnitClassConv;
@@ -84,12 +80,6 @@ module.exports = (function () {
             value: function _dump(val) {
                 var mutate = arguments[1] === undefined ? false : arguments[1];
 
-                for (var i = 0; i < this.equalConvs.length; i++) {
-                    var conv = this.equalConvs[i];
-                    if (conv.value === val) {
-                        return _defineProperty({}, this.options.prefix + conv.path, null);
-                    }
-                }
                 for (var i = 0; i < this.predConvs.length; i++) {
                     var conv = this.predConvs[i];
                     if (conv.pred(val)) {
@@ -220,8 +210,6 @@ module.exports = (function () {
                 switch (true) {
                     case spec instanceof UnitConv:
                         return spec;
-                    case has(spec, "value"):
-                        return new UnitEqualConv(spec);
                     case spec && !!spec["class"]:
                         return new UnitClassConv(spec);
                     case spec && !!spec.proto:
@@ -241,10 +229,6 @@ module.exports = (function () {
                 if (!isObj(selected)) {
                     return this;
                 }switch (true) {
-                    case has(selected, "value"):
-                        unitConvs = unitConvs.filter(function (u) {
-                            return u.value !== selected.value;
-                        });
                     case Boolean(selected["class"]):
                         unitConvs = unitConvs.filter(function (u) {
                             return u["class"] !== selected["class"];
@@ -287,14 +271,6 @@ module.exports = (function () {
                         if (sameToken.length > 1) return {
                                 v: "" + sameToken.length + " converters for token " + token
                             };
-                        if (conv instanceof UnitEqualConv) {
-                            var sameValue = unitConvs.filter(function (t) {
-                                return t instanceof UnitEqualConv && t.value === conv.value;
-                            });
-                            if (sameValue.length > 1) return {
-                                    v: "" + sameValue.length + " equality converters for one value"
-                                };
-                        }
                         if (conv instanceof UnitClassConv) {
                             var sameClass = unitConvs.filter(function (t) {
                                 return t["class"] === conv["class"];

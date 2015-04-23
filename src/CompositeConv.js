@@ -3,8 +3,7 @@ const {cloneDeep, isPlainObject, isArr, isFunc, isObj, getFunctionName, has} = r
 const UnitConv    = require('./UnitConv.js'),
     UnitClassConv = require('./UnitClassConv.js'),
     UnitProtoConv = require('./UnitProtoConv.js'),
-    UnitPredConv  = require('./UnitPredConv.js'),
-    UnitEqualConv = require('./UnitEqualConv.js')
+    UnitPredConv  = require('./UnitPredConv.js')
 
 
 module.exports = class CompositeConv {
@@ -21,7 +20,6 @@ module.exports = class CompositeConv {
         if (!isArr(specs)) throw new Error('Expected array of specs')
         this.unitConvs  = specs.map(this.makeUnitConv)
         this.predConvs  = this.unitConvs.filter((t) => t instanceof UnitPredConv)
-        this.equalConvs = this.unitConvs.filter((t) => t instanceof UnitEqualConv)
         this.classConvs = this.unitConvs
             .filter((t) => t instanceof UnitClassConv)
             .sort((t1, t2) => t2.protoChain.length - t1.protoChain.length)
@@ -56,12 +54,6 @@ module.exports = class CompositeConv {
 
 
     _dump(val, mutate=false) {
-        for (let i = 0; i < this.equalConvs.length; i++) {
-            let conv = this.equalConvs[i]
-            if (conv.value === val) {
-                return { [this.options.prefix + conv.path]: null }
-            }
-        }
         for (let i = 0; i < this.predConvs.length; i++) {
             let conv = this.predConvs[i]
             if (conv.pred(val)) {
@@ -176,7 +168,6 @@ module.exports = class CompositeConv {
     makeUnitConv(spec) {
         switch (true) {
             case spec instanceof UnitConv: return spec
-            case has(spec, 'value'):       return new UnitEqualConv(spec)
             case spec && !!spec.class:     return new UnitClassConv(spec)
             case spec && !!spec.proto:     return new UnitProtoConv(spec)
             case spec && !!spec.pred:      return new UnitPredConv(spec)
@@ -189,8 +180,6 @@ module.exports = class CompositeConv {
         let unitConvs = this.unitConvs
         if (!isObj(selected)) return this
         switch (true) {
-            case has(selected, 'value'):
-                unitConvs = unitConvs.filter((u) => u.value !== selected.value)
             case Boolean(selected.class):
                 unitConvs = unitConvs.filter((u) => u.class !== selected.class)
                 break
@@ -217,10 +206,6 @@ module.exports = class CompositeConv {
                 sameNs    = unitConvs.filter((s) => s.namespace === ns),
                 sameToken = sameNs.filter((s) => s.token === token)
             if (sameToken.length > 1)  return `${sameToken.length} converters for token ${token}`
-            if (conv instanceof UnitEqualConv) {
-                let sameValue = unitConvs.filter((t) => t instanceof UnitEqualConv && t.value === conv.value)
-                if (sameValue.length > 1) return `${sameValue.length} equality converters for one value`
-            }
             if (conv instanceof UnitClassConv) {
                 let sameClass = unitConvs.filter((t) => t.class === conv.class)
                 if (sameClass.length > 1) return `${sameClass.length} converters for class ${getFunctionName(conv.class)}`
