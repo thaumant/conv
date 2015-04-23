@@ -1,4 +1,5 @@
 node_modules
 coverage
 tests_compiled
+perf_compiled
 .coveralls.yml

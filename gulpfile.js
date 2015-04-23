@@ -22,7 +22,12 @@ gulp.task('build:tests', ['clean'], () =>
         .pipe(babel({blacklist: ["spec.functionName"]}))
         .pipe(gulp.dest('tests_compiled')))
 
-gulp.task('build', ['build:dist', 'build:tests'])
+gulp.task('build:perf', ['clean'], () =>
+    gulp.src('perf/*.js')
+        .pipe(babel({blacklist: ["spec.functionName"]}))
+        .pipe(gulp.dest('perf_compiled')))
+
+gulp.task('build', ['build:dist', 'build:tests', 'build:perf'])
 
 
 
