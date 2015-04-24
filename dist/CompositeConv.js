@@ -108,7 +108,8 @@ module.exports = (function () {
                         copy[i] = this._dump(val[i]);
                     }return copy;
                 }
-                if (isPlainObject(val)) {
+                var proto = Object.getPrototypeOf(val);
+                if (proto === null || proto === Object.prototype) {
                     var copy = mutate ? val : {};
                     for (var key in val) {
                         if (val.hasOwnProperty(key)) copy[key] = this._dump(val[key]);

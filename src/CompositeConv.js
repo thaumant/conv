@@ -81,7 +81,8 @@ module.exports = class CompositeConv {
             for (let i = 0; i < val.length; i++) copy[i] = this._dump(val[i])
             return copy
         }
-        if (isPlainObject(val)) {
+        let proto = Object.getPrototypeOf(val)
+        if (proto === null || proto === Object.prototype) {
             let copy = mutate ? val : {}
             for (let key in val) {
                 if (val.hasOwnProperty(key)) copy[key] = this._dump(val[key])
