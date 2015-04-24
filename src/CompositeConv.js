@@ -135,7 +135,7 @@ module.exports = class CompositeConv {
                 result.push(spec)
             }
         })
-        return new CompositeConv(result, options || this.options)
+        return new this.constructor(result, options || this.options)
     }
 
 
@@ -154,12 +154,12 @@ module.exports = class CompositeConv {
                 if (this.validateConsistency(result)) result.shift()
             }
         })
-        return new CompositeConv(result, options || this.options)
+        return new this.constructor(result, options || this.options)
     }
 
 
     withOptions(opts={}) {
-        return new CompositeConv(this.unitConvs, {
+        return new this.constructor(this.unitConvs, {
             prefix:     opts.prefix     || this.options.prefix,
             serializer: opts.serializer || this.options.serializer
         })
@@ -195,7 +195,7 @@ module.exports = class CompositeConv {
                 break
             default: null
         }
-        return new CompositeConv(unitConvs, this.optionsn)
+        return new this.constructor(unitConvs, this.optionsn)
     }
 
 

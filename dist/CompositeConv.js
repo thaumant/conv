@@ -171,7 +171,7 @@ module.exports = (function () {
                         result.push(spec);
                     }
                 });
-                return new CompositeConv(result, options || this.options);
+                return new this.constructor(result, options || this.options);
             }
         },
         overrideBy: {
@@ -193,14 +193,14 @@ module.exports = (function () {
                         if (_this.validateConsistency(result)) result.shift();
                     }
                 });
-                return new CompositeConv(result, options || this.options);
+                return new this.constructor(result, options || this.options);
             }
         },
         withOptions: {
             value: function withOptions() {
                 var opts = arguments[0] === undefined ? {} : arguments[0];
 
-                return new CompositeConv(this.unitConvs, {
+                return new this.constructor(this.unitConvs, {
                     prefix: opts.prefix || this.options.prefix,
                     serializer: opts.serializer || this.options.serializer
                 });
@@ -253,7 +253,7 @@ module.exports = (function () {
                     default:
                         null;
                 }
-                return new CompositeConv(unitConvs, this.optionsn);
+                return new this.constructor(unitConvs, this.optionsn);
             }
         },
         validateConsistency: {
